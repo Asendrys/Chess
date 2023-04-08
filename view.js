@@ -1,3 +1,5 @@
+//Notation
+
 
 //Views
 
@@ -14,6 +16,9 @@ const squareSize = width / 8;
 
 const ctx = canvas.getContext("2d")
 
+// ctx.canvas.width  = window.innerWidth;
+// ctx.canvas.height = window.innerHeight;
+
 const lightSquare = "#eec";
 const darkSquare = "#364";
 
@@ -21,37 +26,39 @@ const markColor = "rgba(0, 96, 256, 0.5)";
 const availableColor = "rgba(0, 256, 96, 0.5)";
 
 
-const img_prefix = "./img/"
+const img_prefix = "./img/Chess_"
+const img_suffix = "t45.svg"
 
-const images_url = [
-    [
-        img_prefix + "Chess_kdt45.svg",
-        img_prefix + "Chess_qdt45.svg",
-        img_prefix + "Chess_rdt45.svg",
-        img_prefix + "Chess_bdt45.svg",
-        img_prefix + "Chess_ndt45.svg",
-        img_prefix + "Chess_pdt45.svg",
-    ], [
-        img_prefix + "Chess_klt45.svg",
-        img_prefix + "Chess_qlt45.svg",
-        img_prefix + "Chess_rlt45.svg",
-        img_prefix + "Chess_blt45.svg",
-        img_prefix + "Chess_nlt45.svg",
-        img_prefix + "Chess_plt45.svg",
-    ]
-]
+const images_url = {
+    black: {
+        king: img_prefix + "kd" + img_suffix,
+        queen: img_prefix + "qd" + img_suffix,
+        rook: img_prefix + "rd" + img_suffix,
+        bishop: img_prefix + "bd" + img_suffix,
+        knight: img_prefix + "nd" + img_suffix,
+        pawn: img_prefix + "pd" + img_suffix,
+    }, 
+    white: {
+        king: img_prefix + "kl" + img_suffix,
+        queen: img_prefix + "ql" + img_suffix,
+        rook: img_prefix + "rl" + img_suffix,
+        bishop: img_prefix + "bl" + img_suffix,
+        knight: img_prefix + "nl" + img_suffix,
+        pawn: img_prefix + "pl" + img_suffix,
+    }
+}
 
-let images = []
-for (let i = 0; i < images_url.length; i++) {
-    let images_col = new Array(images_url[i].length)
-    for (let j = 0; j < images_url[i].length ; j++) {
+let images = {}
+for (const color of Object.keys(images_url) ) {
+    let images_col = {}
+    for (const piecetype of Object.keys(images_url[color])) {
         const img = new Image()
-        img.src = images_url[i][j]
+        img.src = images_url[color][piecetype]
         img.onload = () => {
-            images_col[j]  = img
+            images_col[piecetype] = img
         }
     }
-    images.push(images_col)
+    images[color] = images_col
 }
 
 drawBoardBg = () => {
@@ -75,14 +82,17 @@ drawPieceAt = (color, piece, y, x) => {
     }
 }
 
-drawBoard = (board) => {
+drawBoard = (game) => {
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
-            const cell = board[y][x]
+            const cell = game.board[y][x]
             if (cell.piece.pieceType !== PieceType.None && cell.piece.color != Color.None)
                 drawPieceGrid(cell.piece.color, cell.piece.pieceType, y, x)
         }
     }
+    // for (const piece of game.pieces) {
+    //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+    // }
 }
 
 colorCell = (x, y, color) => {
@@ -93,15 +103,15 @@ colorCell = (x, y, color) => {
 //Draw
 function updateView() {
     drawBoardBg()
-    drawBoard(Board)
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
-            if (Board[y][x].marked) {
+            if (game.board[y][x].marked) {
                 colorCell(x, y, markColor)
             }
-            if (Board[y][x].available) {
+            if (game.board[y][x].available) {
                 colorCell(x, y, availableColor)
             }
         }
     }
+    drawBoard(game)
 }

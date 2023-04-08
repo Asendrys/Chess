@@ -4,6 +4,10 @@
     --canvas-bg-color: rgb(68, 27, 0);
 }
 
+h1 {
+    font-size: large;
+    font-weight: bold;
+}
 
 body {
     color: var(--text-color);

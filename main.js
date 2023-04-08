@@ -1,4 +1,5 @@
-let Board = defaultBoard()
+
+let game = new Game()
 
 function init() {
     update()
