@@ -21,3 +21,7 @@ TODO:
 - Endgame condition
 - Load game position
 - Chess notations
+- Mobile web support
+- Animation when dragging piece
+- Play against computer
+- Online networking?
