@@ -2,6 +2,8 @@
     --text-color: #333; 
     --bg-color: #999; 
     --canvas-bg-color: rgb(68, 27, 0);
+    --button-color: #44444480;
+    --button-hover-color: #666;
 }
 
 h1 {
@@ -20,12 +22,35 @@ a {
     color: var(--text-color);
 }
 
+aside {
+    position: absolute;
+    left: 0px;
+    padding: 2em;
+    /* background-color: rgba(0, 0, 0, 0.4); */
+}
+
+button {
+    background-color: var(--button-color);
+    color: white;
+    padding: 2em;
+    border: none;
+    border-radius: 10% 10%; 
+    cursor:pointer;
+}
+
+button:hover {
+    background-color: var(--button-hover-color);
+}
+
 canvas {
     /* background-color: var(--canvas-bg-color); */
     display: block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 80px;
-    margin-bottom: 80px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+canvas#board {
     border: solid 1px black;
 }

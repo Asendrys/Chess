@@ -1,28 +1,3 @@
-const Color = { 
-    None: "nonecolor",
-    Black: "black",
-    White: "white",
-}
-
-const PieceType = {
-    None: "none",
-    King: "king",
-    Queen: "queen",
-    Rook: "rook",
-    Bishop: "bishop",
-    Knight: "knight", 
-    Pawn: "pawn",
-}
-
-class Piece {
-    constructor(color = Color.None, pieceType = PieceType.None) {
-        this.color = color
-        this.pieceType = pieceType
-        this.hasMoved = false
-        this.justMoved = false //for en passant
-    }
-}
-
 class Cell {
     constructor(x, y, piece = new Piece(Color.None, PieceType.None)) {
         this.y = y //Row index

@@ -1,3 +1,9 @@
+let playerview = Color.Black //temp
+
+function switchView() {
+    playerview = otherColor(playerview)
+    update()
+}
 
 let game = new Game()
 
@@ -7,4 +13,5 @@ function init() {
 
 function update() {
     updateView()
+    updateCaptures()
 }

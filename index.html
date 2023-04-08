@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Chessboard</title>
+    <script src="piece.js" defer></script>
     <script src="board.js" defer></script>
     <script src="moves.js" defer></script>
     <script src="view.js" defer></script>
     <script src="controller.js" defer></script>
     <script src="game.js" defer></script>
+    <script src="viewCaptures.js" defer></script>
     <script src="main.js" defer></script>
 </head>
 <body onload="init()">
@@ -19,8 +21,14 @@
             Chess board
         </h1>
     </header>
+    <p id="msg">&nbsp;</p>
+    <aside>
+        <button onclick="switchView()">Change side</button>
+    </aside>
 
+    <canvas id="opponentCaptures" width="800" height="50"></canvas>
     <canvas id="board" width="600" height="600"></canvas>
+    <canvas id="yourCaptures" width="800" height="50"></canvas>
 
     <footer>
         Chess pieces source:

@@ -1,7 +1,12 @@
-//Notation
+const msg = document.querySelector("#msg")
 
+function message(text) {
+    msg.innerHTML = text
+}
 
-//Views
+function clearMessage() {
+    msg.innerHTML = "&nbsp;" //Default message
+}
 
 const canvas = document.querySelector("#board")
 
@@ -82,17 +87,55 @@ drawPieceAt = (color, piece, y, x) => {
     }
 }
 
-drawBoard = (game) => {
-    for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-            const cell = game.board[y][x]
-            if (cell.piece.pieceType !== PieceType.None && cell.piece.color != Color.None)
-                drawPieceGrid(cell.piece.color, cell.piece.pieceType, y, x)
-        }
+drawBoard = (game, playerColor) => {
+    switch (playerColor) {
+        case Color.White:
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const cell = game.board[y][x]
+                    
+                    if (cell.marked) {
+                        colorCell(x, y, markColor)
+                    }
+                    if (cell.available) {
+                        colorCell(x, y, availableColor)
+                    }
+                    // if (cell.piece.hasMoved) {
+                    //     colorCell(x, y, "#f80")
+                    // }
+                    if (cell.piece.pieceType !== PieceType.None)
+                        drawPieceGrid(cell.piece.color, cell.piece.pieceType, y, x)
+                }
+            }
+            // for (const piece of game.pieces) {
+            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            // }
+        break;
+        case Color.Black:
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const cell = game.board[y][x]
+                    
+                    if (cell.marked) {
+                        colorCell(7-x, 7-y, markColor)
+                    }
+                    if (cell.available) {
+                        colorCell(7-x, 7-y, availableColor)
+                    }
+                    // if (cell.piece.hasMoved) {
+                    //     colorCell(x, y, "#f80")
+                    // }
+                    if (cell.piece.pieceType !== PieceType.None)
+                        drawPieceGrid(cell.piece.color, cell.piece.pieceType, 7-y, 7-x)
+                }
+            }
+            // for (const piece of game.pieces) {
+            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            // }
+        break;
+        default:
+            throw new Error("unreachable")
     }
-    // for (const piece of game.pieces) {
-    //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
-    // }
 }
 
 colorCell = (x, y, color) => {
@@ -103,15 +146,5 @@ colorCell = (x, y, color) => {
 //Draw
 function updateView() {
     drawBoardBg()
-    for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-            if (game.board[y][x].marked) {
-                colorCell(x, y, markColor)
-            }
-            if (game.board[y][x].available) {
-                colorCell(x, y, availableColor)
-            }
-        }
-    }
-    drawBoard(game)
+    drawBoard(game, playerview)
 }

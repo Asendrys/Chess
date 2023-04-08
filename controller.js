@@ -1,26 +1,40 @@
-getCell = (mouseX, mouseY) => {
+getCell = (playerColor, mouseX, mouseY) => {
     const rect = canvas.getBoundingClientRect();
-    return {
-        x: Math.floor((mouseX - rect.x) / squareSize), 
-        y: Math.floor((mouseY - rect.y) / squareSize),
+    const xval = Math.floor((mouseX - rect.x) / squareSize)
+    const yval = Math.floor((mouseY - rect.y) / squareSize)
+    switch (playerColor) {
+        case Color.White:
+            return {
+                x: xval, 
+                y: yval,
+            }
+        case Color.Black:
+            return {
+                x: 7 - xval, 
+                y: 7 - yval,
+            }
+        default:
+            throw new Error("unreachable")
     }
 }
 
 clickdown = (event) => {
+    event.preventDefault();
     if (event.button === 0) { //Only left click
-        let cell_coords = getCell(event.clientX, event.clientY )
+        let cell_coords = getCell(playerview, event.clientX, event.clientY )
         game.select(game.board[cell_coords.y][cell_coords.x])
 
-        availableCells(game.board, cell_coords.x, cell_coords.y).forEach(cell => {
+        availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
             if (inBoundaries(cell.x, cell.y) )
             game.board[cell.y][cell.x].available = true
         })
     }
-    updateView()
+    update()
 }
 
 clickup = (event) => {
-    let cell_coords = getCell(event.clientX, event.clientY )
+    event.preventDefault();
+    let cell_coords = getCell(playerview, event.clientX, event.clientY )
     if (event.button === 0 && game.selecting && (game.selectedCell.x !== cell_coords.x || game.selectedCell.y !== cell_coords.y) ) {
         movePiece(game, game.selectedCell.x, game.selectedCell.y, cell_coords.x, cell_coords.y)
     } else if (event.button === 2) {
@@ -34,11 +48,11 @@ clickup = (event) => {
     }
 
     game.unselect()
-    updateView()
+    update()
 }
 
 canvas.addEventListener('mousedown', clickdown)
-canvas.addEventListener('touchdown', clickdown)
+// canvas.addEventListener('touchdown', clickdown)
 
 canvas.addEventListener('mouseup', clickup)
-canvas.addEventListener('touchup', clickup)
+// canvas.addEventListener('touchup', clickup)

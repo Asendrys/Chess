@@ -5,6 +5,8 @@ class Game {
         this.moves = []
         this.selecting = false
         this.selectedCell = null
+        this.whiteCaptures = []
+        this.blackCaptures = []
     }
 
     select(cell) {
@@ -15,7 +17,8 @@ class Game {
 
     unselect() {
         this.selecting = false
-        this.selectedCell.selected = false
+        if (this.selectedCell !== null)
+            this.selectedCell.selected = false
         this.selectedCell = null
     }
 
@@ -26,6 +29,12 @@ class Game {
         } else if (this.turn === Color.Black) {
             this.turn = Color.White
         }
+    }
+
+    getLastMove() {
+        if (this.moves.length === 0)
+            return []
+        return this.moves.slice(-1)[0]
     }
 
 }
