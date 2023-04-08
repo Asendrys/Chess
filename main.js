@@ -1,17 +1,14 @@
-let playerview = Color.Black //temp
-
+"use strict";
+let playerview = Color.White; //temp
 function switchView() {
-    playerview = otherColor(playerview)
-    update()
+    playerview = otherColor(playerview);
+    update();
 }
-
-let game = new Game()
-
+const game = new Game();
 function init() {
-    update()
+    update();
 }
-
 function update() {
-    updateView()
-    updateCaptures()
+    updateView();
+    updateCaptures();
 }

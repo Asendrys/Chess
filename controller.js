@@ -1,58 +1,55 @@
-getCell = (playerColor, mouseX, mouseY) => {
+"use strict";
+const getCell = (playerColor, mouseX, mouseY) => {
     const rect = canvas.getBoundingClientRect();
-    const xval = Math.floor((mouseX - rect.x) / squareSize)
-    const yval = Math.floor((mouseY - rect.y) / squareSize)
+    const xval = Math.floor((mouseX - rect.x) / squareSize);
+    const yval = Math.floor((mouseY - rect.y) / squareSize);
     switch (playerColor) {
         case Color.White:
             return {
-                x: xval, 
+                x: xval,
                 y: yval,
-            }
+            };
         case Color.Black:
             return {
-                x: 7 - xval, 
+                x: 7 - xval,
                 y: 7 - yval,
-            }
+            };
         default:
-            throw new Error("unreachable")
+            throw new Error("unreachable");
     }
-}
-
-clickdown = (event) => {
+};
+const clickdown = (event) => {
     event.preventDefault();
     if (event.button === 0) { //Only left click
-        let cell_coords = getCell(playerview, event.clientX, event.clientY )
-        game.select(game.board[cell_coords.y][cell_coords.x])
-
+        const cell_coords = getCell(playerview, event.clientX, event.clientY);
+        game.select(game.board[cell_coords.y][cell_coords.x]);
         availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
-            if (inBoundaries(cell.x, cell.y) )
-            game.board[cell.y][cell.x].available = true
-        })
+            if (inBoundaries(cell.x, cell.y))
+                game.board[cell.y][cell.x].available = true;
+        });
     }
-    update()
-}
-
-clickup = (event) => {
+    update();
+};
+const clickup = (event) => {
+    var _a, _b;
     event.preventDefault();
-    let cell_coords = getCell(playerview, event.clientX, event.clientY )
-    if (event.button === 0 && game.selecting && (game.selectedCell.x !== cell_coords.x || game.selectedCell.y !== cell_coords.y) ) {
-        movePiece(game, game.selectedCell.x, game.selectedCell.y, cell_coords.x, cell_coords.y)
-    } else if (event.button === 2) {
-        game.board[cell_coords.y][cell_coords.x].marked = !(game.board[cell_coords.y][cell_coords.x].marked)
+    const cell_coords = getCell(playerview, event.clientX, event.clientY);
+    if (event.button === 0 && game.selecting && (((_a = game.selectedCell) === null || _a === void 0 ? void 0 : _a.x) !== cell_coords.x || ((_b = game.selectedCell) === null || _b === void 0 ? void 0 : _b.y) !== cell_coords.y)) {
+        const cell = game.selectedCell;
+        movePiece(game, cell.x, cell.y, cell_coords.x, cell_coords.y);
     }
-
-    for (let row = 0; row < 8 ; row++) {
+    else if (event.button === 2) {
+        game.board[cell_coords.y][cell_coords.x].marked = !(game.board[cell_coords.y][cell_coords.x].marked);
+    }
+    for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
-            game.board[row][col].available = false
+            game.board[row][col].available = false;
         }
     }
-
-    game.unselect()
-    update()
-}
-
-canvas.addEventListener('mousedown', clickdown)
+    game.unselect();
+    update();
+};
+canvas.addEventListener('mousedown', clickdown);
 // canvas.addEventListener('touchdown', clickdown)
-
-canvas.addEventListener('mouseup', clickup)
+canvas.addEventListener('mouseup', clickup);
 // canvas.addEventListener('touchup', clickup)
