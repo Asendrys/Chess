@@ -37,7 +37,7 @@ class Piece {
         this.image = getImage(color, pieceType);
     }
     isEquals(otherPiece) {
-        if (this.id !== undefined || otherPiece.id !== undefined)
+        if (this.id === undefined || otherPiece.id === undefined)
             return false;
         return (this.id === otherPiece.id);
     }

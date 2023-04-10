@@ -160,12 +160,13 @@ const enPassantAvailableCell = (game, currX, currY) => {
     const lastMove = game.getLastMove();
     if (lastMove === null)
         return [];
-    const lastPieceMoved = lastMove.pieceMoved; // "!" to fix
+    const lastPieceMoved = lastMove.pieceMoved;
     const out = [];
     if (inBoundaries(currX + 1, currY + forwardDir) && inBoundaries(currX + 1, currY)) {
         const rightPiece = game.board.at(currY, currX + 1).piece;
-        if (!game.board.at(currY + forwardDir, currX + 1).piece //if no piece on diagonal
-            && (rightPiece === null || rightPiece === void 0 ? void 0 : rightPiece.color) === otherColor(currPiece.color) //if opponent's pawn to currPiece side
+        if (game.board.at(currY + forwardDir, currX + 1).piece === undefined //if no piece on diagonal
+            && rightPiece !== undefined
+            && rightPiece.color === otherColor(currPiece.color) //if opponent's pawn to currPiece side
             && lastPieceMoved.isEquals(rightPiece) //if it is the last piece moved
             && lastPieceMoved.enPassantable //if it just made an en passant
         )
@@ -174,7 +175,7 @@ const enPassantAvailableCell = (game, currX, currY) => {
     if (inBoundaries(currX - 1, currY + forwardDir) && inBoundaries(currX - 1, currY)) {
         const leftPiece = game.board.at(currY, currX - 1).piece;
         if (game.board.at(currY + forwardDir, currX - 1).piece === undefined //if no piece on diagonal
-            && leftPiece
+            && leftPiece !== undefined
             && leftPiece.color === otherColor(currPiece.color) //if opponent's pawn to currPiece side
             && lastPieceMoved.isEquals(leftPiece) //if it is the last piece moved
             && lastPieceMoved.enPassantable //if it just made an en passant

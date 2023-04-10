@@ -105,14 +105,14 @@ const drawBoard = (game, playerColor) => {
         case Color.White:
             for (const piece of game.whitePieces) {
                 if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                 )) {
                     drawPieceGrid(piece, piece.y, piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
                 if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                 )) {
                     drawPieceGrid(piece, piece.y, piece.x);
                 }
@@ -135,14 +135,14 @@ const drawBoard = (game, playerColor) => {
         case Color.Black:
             for (const piece of game.whitePieces) {
                 if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                 )) {
                     drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
                 if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                 )) {
                     drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
                 }

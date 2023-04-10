@@ -48,7 +48,7 @@ class Piece {
     }
     
     isEquals(otherPiece : Piece) {
-        if (this.id !== undefined || otherPiece.id !== undefined) return false;
+        if (this.id === undefined || otherPiece.id === undefined) return false;
         return (this.id === otherPiece.id);
     }
 }
