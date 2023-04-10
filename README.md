@@ -13,9 +13,6 @@ $ tsc
 (Unfinished!)
 
 TODO:
-- En passant move (not detection)
-- Castle move and detection
-- Promotion
 - Check detection
 - Restrain pieces that makes check if they move
 - Endgame condition
@@ -25,3 +22,4 @@ TODO:
 - Animation when dragging piece
 - Play against computer
 - Online networking?
+- Upscale when zooming

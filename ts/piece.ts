@@ -1,13 +1,10 @@
-enum Color { 
-    None,
+enum Color {
     Black,
     White,
 }
 
 const otherColor = (color:Color) : Color => {
     switch (color) {
-        case Color.None:
-            return Color.None
         case Color.Black:
             return Color.White
         case Color.White:
@@ -18,7 +15,6 @@ const otherColor = (color:Color) : Color => {
 }
 
 enum PieceType {
-    None,
     King,
     Queen,
     Rook,
@@ -30,26 +26,23 @@ enum PieceType {
 class Piece {
     static numPieces:number = 0;
     color: Color;
-    pieceType: PieceType;
+    type: PieceType;
     hasMoved : boolean;
     enPassantable : boolean;
-    id : number;
-    image? : HTMLImageElement;
-    constructor(color : Color = Color.None, pieceType : PieceType = PieceType.None) {
+    id ?: number;
+    image : HTMLImageElement;
+    constructor(color : Color, pieceType : PieceType, hasID : boolean = true) {
         this.color = color
-        this.pieceType = pieceType
+        this.type = pieceType
         this.hasMoved = false
         this.enPassantable = false
-        this.id = Piece.numPieces++
-        if (color != Color.None || pieceType != PieceType.None) {
-            const img : HTMLImageElement = getImage(color, pieceType)
-            img.onload = () => { //TODO : fix image loading
-                this.image = img;
-            }
-            
-        }
+        if (hasID)
+            this.id = Piece.numPieces++
+        this.image = getImage(color, pieceType)
     }
+    
     isEquals(otherPiece : Piece) {
+        if (this.id !== undefined || otherPiece.id !== undefined) return false;
         return (this.id === otherPiece.id)
     }
 }

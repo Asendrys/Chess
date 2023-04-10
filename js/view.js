@@ -1,4 +1,14 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+const toDraw = new Set();
 const msg = document.querySelector("#msg");
 function message(text) {
     msg.innerHTML = text;
@@ -18,6 +28,7 @@ const ctx = canvas.getContext("2d");
 // ctx.canvas.height = window.innerHeight;
 const lightSquare = "#eec";
 const darkSquare = "#364";
+const bgColor = "#999";
 const markColor = "rgba(0, 96, 256, 0.5)";
 const availableColor = "rgba(0, 256, 96, 0.5)";
 const img_prefix = "./img/Chess_";
@@ -88,9 +99,7 @@ const getImageUrl = (color, pieceType) => {
 const getImageFromUrl = (image_url) => {
     const img = new Image();
     img.src = image_url;
-    // img.onload = () => { //TODO : fix image loading
-    //     return img;
-    // }
+    // img.decode().then();
     return img;
 };
 const getImage = (color, pieceType) => {
@@ -104,14 +113,24 @@ const drawBoardBg = () => {
         }
     }
 };
-const drawPieceGrid = (piece, y, x) => {
-    if (piece.image)
-        ctx.drawImage(piece.image, x * squareSize, y * squareSize, squareSize, squareSize);
-};
-const drawPieceAt = (piece, y, x) => {
-    if (piece.image)
-        ctx.drawImage(piece.image, x, y, squareSize, squareSize);
-};
+const drawPieceGrid = (piece, y, x, bg) => __awaiter(void 0, void 0, void 0, function* () {
+    yield piece.image.decode();
+    if (bg !== undefined) {
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+    }
+    ctx.drawImage(piece.image, x * squareSize, y * squareSize, squareSize, squareSize);
+});
+const drawPieceAt = (piece, y, x) => __awaiter(void 0, void 0, void 0, function* () {
+    yield piece.image.decode();
+    ctx.drawImage(piece.image, x, y, squareSize, squareSize);
+});
+const drawPromotion = (prom) => __awaiter(void 0, void 0, void 0, function* () {
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Queen, false), prom.queenY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Rook, false), prom.rookY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Bishop, false), prom.bishopY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Knight, false), prom.knightY, prom.file, bgColor);
+});
 const drawBoard = (game, playerColor) => {
     switch (playerColor) {
         case Color.White:
@@ -127,12 +146,12 @@ const drawBoard = (game, playerColor) => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece.pieceType !== PieceType.None)
+                    if (cell.piece !== undefined)
                         drawPieceGrid(cell.piece, y, x);
                 }
             }
             // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
             // }
             break;
         case Color.Black:
@@ -148,12 +167,12 @@ const drawBoard = (game, playerColor) => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece.pieceType !== PieceType.None)
+                    if (cell.piece !== undefined)
                         drawPieceGrid(cell.piece, 7 - y, 7 - x);
                 }
             }
             // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
             // }
             break;
         default:
@@ -168,4 +187,9 @@ const colorCell = (x, y, color) => {
 function updateView() {
     drawBoardBg();
     drawBoard(game, playerview);
+    for (const elt of toDraw) {
+        if (elt instanceof Promotion) {
+            drawPromotion(elt);
+        }
+    }
 }

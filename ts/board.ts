@@ -1,20 +1,20 @@
 class Cell {
     y : number;
     x : number;
-    piece : Piece;
+    piece ?: Piece;
     selected : boolean;
     marked : boolean;
     available : boolean;
-    inCheck : boolean;
-    
-    constructor(x : number, y : number, piece : Piece = new Piece(Color.None, PieceType.None)) {
+    inCheckBy : Set<Color>; //.add, .delete, .has
+
+    constructor(x : number, y : number, piece ?: Piece) {
         this.y = y; //Row index
         this.x = x; //Column index
         this.piece = piece;
         this.selected = false;
         this.marked = false;
         this.available = false;
-        this.inCheck = false;
+        this.inCheckBy = new Set();
     }
 }
 

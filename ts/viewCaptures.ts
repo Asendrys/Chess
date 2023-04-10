@@ -27,12 +27,12 @@ const displayCaptures = (game : Game, color : Color, playerView : Color) : void 
     switch (color) {
         case Color.Black:
             for (let i = 0; i < game.blackCaptures.length; i++) {
-                drawPiecePos(game.blackCaptures[i].color, game.blackCaptures[i].pieceType, i, contextYour)
+                drawPiecePos(game.blackCaptures[i].color, game.blackCaptures[i].type, i, contextYour)
             }
             break;
         case Color.White:
             for (let i = 0; i < game.whiteCaptures.length; i++) {
-                drawPiecePos(game.whiteCaptures[i].color, game.whiteCaptures[i].pieceType, i, contextOpp)
+                drawPiecePos(game.whiteCaptures[i].color, game.whiteCaptures[i].type, i, contextOpp)
             }
             break;
         default:

@@ -1,3 +1,5 @@
+const toDraw : Set<any> = new Set()
+
 const msg = document.querySelector("#msg") as HTMLParagraphElement
 
 function message(text : string) : void {
@@ -26,6 +28,7 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
 const lightSquare : string = "#eec";
 const darkSquare : string = "#364";
+const bgColor : string = "#999";
 
 const markColor : string = "rgba(0, 96, 256, 0.5)";
 const availableColor : string = "rgba(0, 256, 96, 0.5)";
@@ -103,17 +106,17 @@ const getImageUrl = (color : Color, pieceType : PieceType) : string => {
 const getImageFromUrl = (image_url : string) : HTMLImageElement => {
     const img : HTMLImageElement = new Image()
     img.src = image_url;
-    // img.onload = () => { //TODO : fix image loading
-    //     return img;
-    // }
+    // img.decode().then();
+    
     return img;
 }
+
 
 const getImage = (color : Color, pieceType : PieceType) : HTMLImageElement => {
     return getImageFromUrl(getImageUrl(color, pieceType));
 }
 
-const drawBoardBg = () => {
+const drawBoardBg = () : void => {
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             ctx.fillStyle = ((i+j)%2) ? darkSquare : lightSquare;
@@ -122,17 +125,29 @@ const drawBoardBg = () => {
     }
 }
 
-const drawPieceGrid = (piece : Piece, y:number, x:number) : void => {
-    if (piece.image)
-        ctx.drawImage(piece.image, x*squareSize, y*squareSize, squareSize, squareSize)
+const drawPieceGrid = async (piece : Piece, y:number, x:number, bg?:string) : Promise<void> => {
+
+    await piece.image.decode()
+    if (bg !== undefined) {
+        ctx.fillStyle = bgColor
+        ctx.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
+    }
+    ctx.drawImage(piece.image, x*squareSize, y*squareSize, squareSize, squareSize)
 }
 
-const drawPieceAt = (piece : Piece, y : number, x : number) : void => {
-    if (piece.image)
-        ctx.drawImage(piece.image, x, y, squareSize, squareSize)
+const drawPieceAt = async (piece : Piece, y : number, x : number) : Promise<void> => {
+    await piece.image.decode()
+    ctx.drawImage(piece.image, x, y, squareSize, squareSize)
 }
 
-const drawBoard = (game : Game, playerColor : Color) => {
+const drawPromotion = async (prom : Promotion): Promise<void> => {
+    await drawPieceGrid(new Piece(prom.color, PieceType.Queen,  false), prom.queenY, prom.file, bgColor)
+    await drawPieceGrid(new Piece(prom.color, PieceType.Rook,   false), prom.rookY, prom.file, bgColor)
+    await drawPieceGrid(new Piece(prom.color, PieceType.Bishop, false), prom.bishopY, prom.file, bgColor)
+    await drawPieceGrid(new Piece(prom.color, PieceType.Knight, false), prom.knightY, prom.file, bgColor)
+}
+
+const drawBoard = (game : Game, playerColor : Color) : void => {
     switch (playerColor) {
         case Color.White:
             for (let y = 0; y < 8; y++) {
@@ -148,12 +163,12 @@ const drawBoard = (game : Game, playerColor : Color) => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece.pieceType !== PieceType.None)
+                    if (cell.piece !== undefined)
                         drawPieceGrid(cell.piece, y, x)
                 }
             }
             // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
             // }
         break;
         case Color.Black:
@@ -170,12 +185,12 @@ const drawBoard = (game : Game, playerColor : Color) => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece.pieceType !== PieceType.None)
+                    if (cell.piece !== undefined)
                         drawPieceGrid(cell.piece, 7-y, 7-x)
                 }
             }
             // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.pieceType, piece.y, piece.x)
+            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
             // }
         break;
         default:
@@ -192,4 +207,11 @@ const colorCell = (x:number, y:number, color:string):void => {
 function updateView():void {
     drawBoardBg()
     drawBoard(game, playerview)
+
+    for (const elt of toDraw) {
+        if (elt instanceof Promotion) {
+            drawPromotion(elt)
+        }
+    }
+
 }

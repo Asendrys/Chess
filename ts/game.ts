@@ -30,7 +30,7 @@ class Game {
         this.selectedCell = null
     }
 
-    play() : void {
+    nextTurn() : void {
         // console.log((this.moves.slice(-1)[0]).toString())
         if (this.turn === Color.White) {
             this.turn = Color.Black

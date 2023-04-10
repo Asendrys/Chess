@@ -1,14 +1,11 @@
 "use strict";
 var Color;
 (function (Color) {
-    Color[Color["None"] = 0] = "None";
-    Color[Color["Black"] = 1] = "Black";
-    Color[Color["White"] = 2] = "White";
+    Color[Color["Black"] = 0] = "Black";
+    Color[Color["White"] = 1] = "White";
 })(Color || (Color = {}));
 const otherColor = (color) => {
     switch (color) {
-        case Color.None:
-            return Color.None;
         case Color.Black:
             return Color.White;
         case Color.White:
@@ -19,29 +16,26 @@ const otherColor = (color) => {
 };
 var PieceType;
 (function (PieceType) {
-    PieceType[PieceType["None"] = 0] = "None";
-    PieceType[PieceType["King"] = 1] = "King";
-    PieceType[PieceType["Queen"] = 2] = "Queen";
-    PieceType[PieceType["Rook"] = 3] = "Rook";
-    PieceType[PieceType["Bishop"] = 4] = "Bishop";
-    PieceType[PieceType["Knight"] = 5] = "Knight";
-    PieceType[PieceType["Pawn"] = 6] = "Pawn";
+    PieceType[PieceType["King"] = 0] = "King";
+    PieceType[PieceType["Queen"] = 1] = "Queen";
+    PieceType[PieceType["Rook"] = 2] = "Rook";
+    PieceType[PieceType["Bishop"] = 3] = "Bishop";
+    PieceType[PieceType["Knight"] = 4] = "Knight";
+    PieceType[PieceType["Pawn"] = 5] = "Pawn";
 })(PieceType || (PieceType = {}));
 class Piece {
-    constructor(color = Color.None, pieceType = PieceType.None) {
+    constructor(color, pieceType, hasID = true) {
         this.color = color;
-        this.pieceType = pieceType;
+        this.type = pieceType;
         this.hasMoved = false;
         this.enPassantable = false;
-        this.id = Piece.numPieces++;
-        if (color != Color.None || pieceType != PieceType.None) {
-            const img = getImage(color, pieceType);
-            img.onload = () => {
-                this.image = img;
-            };
-        }
+        if (hasID)
+            this.id = Piece.numPieces++;
+        this.image = getImage(color, pieceType);
     }
     isEquals(otherPiece) {
+        if (this.id !== undefined || otherPiece.id !== undefined)
+            return false;
         return (this.id === otherPiece.id);
     }
 }

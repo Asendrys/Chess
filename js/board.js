@@ -1,13 +1,13 @@
 "use strict";
 class Cell {
-    constructor(x, y, piece = new Piece(Color.None, PieceType.None)) {
+    constructor(x, y, piece) {
         this.y = y; //Row index
         this.x = x; //Column index
         this.piece = piece;
         this.selected = false;
         this.marked = false;
         this.available = false;
-        this.inCheck = false;
+        this.inCheckBy = new Set();
     }
 }
 const defaultBoard = () => {
