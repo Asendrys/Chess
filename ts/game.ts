@@ -4,17 +4,38 @@ class Game {
     moves: Array<Move>
     selecting : boolean
     selectedCell : Cell | null
+    whitePieces : Array<Piece>
+    blackPieces : Array<Piece>
+    whiteKing : Piece
+    blackKing : Piece
     whiteCaptures : Array<Piece>
     blackCaptures : Array<Piece>
 
     constructor() {
-        this.board = defaultBoard()
-        this.turn = Color.White
-        this.moves = []
-        this.selecting = false
-        this.selectedCell = null
-        this.whiteCaptures = []
-        this.blackCaptures = []
+        this.board = new Board();
+        this.turn = Color.White;
+        this.moves = [];
+        this.selecting = false;
+        this.selectedCell = null;
+        this.whitePieces = [];
+        this.blackPieces = [];
+
+        this.whiteKing = this.board.at(7, 4)?.piece!;
+        this.blackKing = this.board.at(0, 4)?.piece!;
+
+        [6, 7].forEach((row:number) => {
+            for (let col = 0; col < 8; col++) {
+                this.whitePieces.push(this.board.at(row, col)?.piece!);
+            }
+        });
+        [0, 1].forEach((row:number) => {
+            for (let col = 0; col < 8; col++) {
+                this.blackPieces.push(this.board.at(row, col)!.piece!);
+            }
+        });
+
+        this.whiteCaptures = [];
+        this.blackCaptures = [];
     }
 
     select(cell : Cell) : void {

@@ -126,17 +126,25 @@ const drawPieceAt = (piece, y, x) => __awaiter(void 0, void 0, void 0, function*
     ctx.drawImage(piece.image, x, y, squareSize, squareSize);
 });
 const drawPromotion = (prom) => __awaiter(void 0, void 0, void 0, function* () {
-    yield drawPieceGrid(new Piece(prom.color, PieceType.Queen, false), prom.queenY, prom.file, bgColor);
-    yield drawPieceGrid(new Piece(prom.color, PieceType.Rook, false), prom.rookY, prom.file, bgColor);
-    yield drawPieceGrid(new Piece(prom.color, PieceType.Bishop, false), prom.bishopY, prom.file, bgColor);
-    yield drawPieceGrid(new Piece(prom.color, PieceType.Knight, false), prom.knightY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor);
+    yield drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor);
 });
 const drawBoard = (game, playerColor) => {
     switch (playerColor) {
         case Color.White:
+            game.whitePieces.forEach((piece) => {
+                if (piece.x !== undefined && piece.y !== undefined)
+                    drawPieceGrid(piece, piece.y, piece.x);
+            });
+            game.blackPieces.forEach((piece) => {
+                if (piece.x !== undefined && piece.y !== undefined)
+                    drawPieceGrid(piece, piece.y, piece.x);
+            });
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 8; x++) {
-                    const cell = game.board[y][x];
+                    const cell = game.board.at(y, x);
                     if (cell.marked) {
                         colorCell(x, y, markColor);
                     }
@@ -155,9 +163,17 @@ const drawBoard = (game, playerColor) => {
             // }
             break;
         case Color.Black:
+            game.whitePieces.forEach((piece) => {
+                if (piece.x !== undefined && piece.y !== undefined)
+                    drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
+            });
+            game.blackPieces.forEach((piece) => {
+                if (piece.x !== undefined && piece.y !== undefined)
+                    drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
+            });
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 8; x++) {
-                    const cell = game.board[y][x];
+                    const cell = game.board.at(y, x);
                     if (cell.marked) {
                         colorCell(7 - x, 7 - y, markColor);
                     }
@@ -167,8 +183,8 @@ const drawBoard = (game, playerColor) => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece !== undefined)
-                        drawPieceGrid(cell.piece, 7 - y, 7 - x);
+                    // if (cell.piece !== undefined)
+                    //     drawPieceGrid(cell.piece, 7-y, 7-x)
                 }
             }
             // for (const piece of game.pieces) {

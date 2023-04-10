@@ -24,11 +24,14 @@ var PieceType;
     PieceType[PieceType["Pawn"] = 5] = "Pawn";
 })(PieceType || (PieceType = {}));
 class Piece {
-    constructor(color, pieceType, hasID = true) {
+    constructor(color, pieceType, x, y, hasID = true) {
         this.color = color;
         this.type = pieceType;
+        this.x = x;
+        this.y = y;
         this.hasMoved = false;
         this.enPassantable = false;
+        this.isOut = false;
         if (hasID)
             this.id = Piece.numPieces++;
         this.image = getImage(color, pieceType);

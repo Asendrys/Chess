@@ -1,11 +1,27 @@
 "use strict";
 class Game {
     constructor() {
-        this.board = defaultBoard();
+        var _a, _b;
+        this.board = new Board();
         this.turn = Color.White;
         this.moves = [];
         this.selecting = false;
         this.selectedCell = null;
+        this.whitePieces = [];
+        this.blackPieces = [];
+        this.whiteKing = (_a = this.board.at(7, 4)) === null || _a === void 0 ? void 0 : _a.piece;
+        this.blackKing = (_b = this.board.at(0, 4)) === null || _b === void 0 ? void 0 : _b.piece;
+        [6, 7].forEach((row) => {
+            var _a;
+            for (let col = 0; col < 8; col++) {
+                this.whitePieces.push((_a = this.board.at(row, col)) === null || _a === void 0 ? void 0 : _a.piece);
+            }
+        });
+        [0, 1].forEach((row) => {
+            for (let col = 0; col < 8; col++) {
+                this.blackPieces.push(this.board.at(row, col).piece);
+            }
+        });
         this.whiteCaptures = [];
         this.blackCaptures = [];
     }

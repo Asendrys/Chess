@@ -29,20 +29,26 @@ class Piece {
     type: PieceType;
     hasMoved : boolean;
     enPassantable : boolean;
+    isOut : boolean;
+    x ?: number;
+    y ?: number;
     id ?: number;
     image : HTMLImageElement;
-    constructor(color : Color, pieceType : PieceType, hasID : boolean = true) {
-        this.color = color
-        this.type = pieceType
-        this.hasMoved = false
-        this.enPassantable = false
+    constructor(color : Color, pieceType : PieceType, x?: number, y?:number, hasID : boolean = true) {
+        this.color = color;
+        this.type = pieceType;
+        this.x = x;
+        this.y = y;
+        this.hasMoved = false;
+        this.enPassantable = false;
+        this.isOut = false;
         if (hasID)
-            this.id = Piece.numPieces++
-        this.image = getImage(color, pieceType)
+            this.id = Piece.numPieces++;
+        this.image = getImage(color, pieceType);
     }
     
     isEquals(otherPiece : Piece) {
         if (this.id !== undefined || otherPiece.id !== undefined) return false;
-        return (this.id === otherPiece.id)
+        return (this.id === otherPiece.id);
     }
 }
