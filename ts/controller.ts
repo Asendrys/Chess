@@ -21,42 +21,79 @@ const getCell = (playerColor : Color, mouseX : number, mouseY : number) : {x:num
 }
 
 const clickdown = (event : MouseEvent) => {
+    update()
     event.preventDefault();
     if (event.button === 0) { //Only left click
         const cell_coords : {x:number, y:number} = getCell(playerview, event.clientX, event.clientY )
         game.select(game.board.at(cell_coords.y, cell_coords.x)!)
-        availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
-            if (inBoundaries(cell.x, cell.y) )
-                game.board.at(cell.y, cell.x)!.available = true
-        })
     }
-    update()
 }
 
 canvas.addEventListener('mousedown', clickdown)
 
-canvas.addEventListener('touchstart', (event : TouchEvent) => {
-    event.preventDefault();
-    const cell_coords : {x:number, y:number} = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
-    game.select(game.board.at(cell_coords.y, cell_coords.x)!)
+const computeAvailableCells = (val: boolean, game: Game, cell_coords : {x:number, y:number}) : void => {
     availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
         if (inBoundaries(cell.x, cell.y) )
-            game.board.at(cell.y, cell.x)!.available = true
+            game.board.at(cell.y, cell.x)!.available = val
     })
+}
+
+const hover = (event : MouseEvent) => {
     update()
-})
+    //Remove available marked cells
+    for (let row = 0; row < 8 ; row++) {
+        for (let col = 0; col < 8; col++) {
+            game.board.at(row, col)!.available = false
+        }
+    }
+    const cell_coords : {x:number, y:number} = getCell(playerview, event.clientX, event.clientY )
+    // game.select(game.board.at(cell_coords.y, cell_coords.x)!)
+    if (!game.selecting) { //Draw the available green squares
+        computeAvailableCells(true, game, cell_coords)
+    }
+
+    if (event.button === 0 && game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined) { // Selecting
+        computeAvailableCells(true, game, game.selectedCell)
+        const rect = canvas.getBoundingClientRect();
+        drawPieceAt(game.selectedCell.piece, 
+            Math.floor(event.clientY - rect.y - 0.5*squareSize), 
+            Math.floor(event.clientX - rect.x - 0.5*squareSize)
+        )
+    }
+}
+
+canvas.addEventListener('mousemove', hover)
+
+// canvas.addEventListener("mouseleave", (event) => {
+//     canvas.removeEventListener("mousemove", hover)
+// })
+
+// canvas.addEventListener("mouseenter", (event) => {
+//     canvas.addEventListener("mousemove", hover)
+// })
+
+// canvas.addEventListener('touchstart', (event : TouchEvent) => {
+//     event.preventDefault();
+//     const cell_coords : {x:number, y:number} = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
+//     game.select(game.board.at(cell_coords.y, cell_coords.x)!)
+//     availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
+//         if (inBoundaries(cell.x, cell.y) )
+//             game.board.at(cell.y, cell.x)!.available = true
+//     })
+//     update()
+// })
 
 canvas.addEventListener('mouseup', (event : MouseEvent) => {
     event.preventDefault();
     const cell_coords = getCell(playerview, event.clientX, event.clientY )
-    if (event.button === 0 && game.selecting && (game.selectedCell?.x !== cell_coords.x || game.selectedCell?.y !== cell_coords.y) ) {
+    if (event.button === 0 && game.selecting && (game.selectedCell?.x !== cell_coords.x || game.selectedCell?.y !== cell_coords.y) ) { // If dragged to a different cell
         const cell = game.selectedCell as Cell;
         movePiece(game, cell.x, cell.y, cell_coords.x, cell_coords.y)
-    } else if (event.button === 2) {
+    } else if (event.button === 2) { //If marking cells
         game.board.at(cell_coords.y, cell_coords.x)!.marked = !(game.board.at(cell_coords.y, cell_coords.x)!.marked)
     }
 
-    for (let row = 0; row < 8 ; row++) {
+    for (let row = 0; row < 8 ; row++) { 
         for (let col = 0; col < 8; col++) {
             game.board.at(row, col)!.available = false
         }

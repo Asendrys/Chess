@@ -16,15 +16,25 @@ canvas.oncontextmenu = function (event) {
     event.preventDefault();
 };
 
-const width : number = canvas.width;
-const height : number = canvas.height;
+let width : number = canvas.width;
+let height : number = canvas.height;
 
-const squareSize : number = width / 8;
+let squareSize : number = width / 8;
 
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
-// ctx.canvas.width  = window.innerWidth;
-// ctx.canvas.height = window.innerHeight;
+// window.addEventListener("resize", (event) => {
+//     const size = Math.min(window.screen.width, window.screen.height)
+//     canvas.width = Math.floor(0.7 * size / 8) * 8
+//     canvas.height = Math.floor(0.7 * size/ 8) * 8
+
+//     width = canvas.width;
+//     height = canvas.height;
+//     squareSize = Math.floor(width / 8);
+//     // ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+//     update()
+// })
+
 
 const lightSquare : string = "#eec";
 const darkSquare : string = "#364";
@@ -33,47 +43,8 @@ const bgColor : string = "#999";
 const markColor : string = "rgba(0, 96, 256, 0.5)";
 const availableColor : string = "rgba(0, 256, 96, 0.5)";
 
-
 const img_prefix : string = "./img/Chess_"
 const img_suffix : string = "t45.svg"
-
-// const images_url : Object = {
-//     Color.Black: {
-//         PieceType.King: img_prefix + "kd" + img_suffix,
-//         PieceType.Queen: img_prefix + "qd" + img_suffix,
-//         PieceType.Rook: img_prefix + "rd" + img_suffix,
-//         PieceType.Bishop: img_prefix + "bd" + img_suffix,
-//         PieceType.Knight: img_prefix + "nd" + img_suffix,
-//         PieceType.Pawn: img_prefix + "pd" + img_suffix,
-//     }, 
-//     Color.White: {
-//         PieceType.King: img_prefix + "kl" + img_suffix,
-//         PieceType.Queen: img_prefix + "ql" + img_suffix,
-//         PieceType.Rook: img_prefix + "rl" + img_suffix,
-//         PieceType.Bishop: img_prefix + "bl" + img_suffix,
-//         PieceType.Knight: img_prefix + "nl" + img_suffix,
-//         PieceType.Pawn: img_prefix + "pl" + img_suffix,
-//     }
-// }
-
-const images_url : {[col in Color]?: {[pt in PieceType]?: string} } = {
-    [Color.Black]: {
-        [PieceType.King]    : img_prefix + "kd" + img_suffix,
-        [PieceType.Queen]   : img_prefix + "qd" + img_suffix,
-        [PieceType.Rook]    : img_prefix + "rd" + img_suffix,
-        [PieceType.Bishop]  : img_prefix + "bd" + img_suffix,
-        [PieceType.Knight]  : img_prefix + "nd" + img_suffix,
-        [PieceType.Pawn]    : img_prefix + "pd" + img_suffix,
-    },
-    [Color.White]: {
-        [PieceType.King]    : img_prefix + "kl" + img_suffix,
-        [PieceType.Queen]   : img_prefix + "ql" + img_suffix,
-        [PieceType.Rook]    : img_prefix + "rl" + img_suffix,
-        [PieceType.Bishop]  : img_prefix + "bl" + img_suffix,
-        [PieceType.Knight]  : img_prefix + "nl" + img_suffix,
-        [PieceType.Pawn]    : img_prefix + "pl" + img_suffix,
-    }
-}
 
 const getImageUrl = (color : Color, pieceType : PieceType) : string => {
     switch (color) {
@@ -87,7 +58,6 @@ const getImageUrl = (color : Color, pieceType : PieceType) : string => {
             case PieceType.Pawn  : return img_prefix + "pd" + img_suffix;
             default: throw new Error("Unreachable");
         }
-        break;
     case Color.White:
         switch (pieceType) {
             case PieceType.King  : return img_prefix + "kl" + img_suffix;
@@ -98,7 +68,6 @@ const getImageUrl = (color : Color, pieceType : PieceType) : string => {
             case PieceType.Pawn  : return img_prefix + "pl" + img_suffix;
             default: throw new Error("Unreachable");
         }
-        break;
     default: throw new Error("Unreachable");
     }
 }
@@ -106,8 +75,6 @@ const getImageUrl = (color : Color, pieceType : PieceType) : string => {
 const getImageFromUrl = (image_url : string) : HTMLImageElement => {
     const img : HTMLImageElement = new Image()
     img.src = image_url;
-    // img.decode().then();
-    
     return img;
 }
 
@@ -126,7 +93,6 @@ const drawBoardBg = () : void => {
 }
 
 const drawPieceGrid = async (piece : Piece, y:number, x:number, bg?:string) : Promise<void> => {
-
     await piece.image.decode()
     if (bg !== undefined) {
         ctx.fillStyle = bgColor
@@ -140,24 +106,34 @@ const drawPieceAt = async (piece : Piece, y : number, x : number) : Promise<void
     ctx.drawImage(piece.image, x, y, squareSize, squareSize)
 }
 
-const drawPromotion = async (prom : Promotion): Promise<void> => {
-    await drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor)
-    await drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor)
-    await drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor)
-    await drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor)
+const drawPromotion = (prom : Promotion): void => {
+    drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor)
+    drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor)
+    drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor)
+    drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor)
 }
 
 const drawBoard = (game : Game, playerColor : Color) : void => {
     switch (playerColor) {
         case Color.White:
-            game.whitePieces.forEach( (piece : Piece) => {
-                if (piece.x !== undefined && piece.y !== undefined)
-                drawPieceGrid(piece, piece.y, piece.x);
-            })
-            game.blackPieces.forEach( (piece : Piece) => {
-                if (piece.x !== undefined && piece.y !== undefined)
-                drawPieceGrid(piece, piece.y, piece.x);
-            })
+            for (const piece of game.whitePieces) {
+                if (piece.x !== undefined && piece.y !== undefined && (
+                    !game.selecting
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    )    
+                ) {
+                    drawPieceGrid(piece, piece.y, piece.x);
+                }
+            }
+            for (const piece of game.blackPieces) {
+                if (piece.x !== undefined && piece.y !== undefined && (
+                    !game.selecting
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    )    
+                ) {
+                    drawPieceGrid(piece, piece.y, piece.x);
+                }
+            }
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 8; x++) {
                     const cell = game.board.at(y, x)!
@@ -171,23 +147,28 @@ const drawBoard = (game : Game, playerColor : Color) : void => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    if (cell.piece !== undefined)
-                        drawPieceGrid(cell.piece, y, x)
                 }
             }
-            // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
-            // }
         break;
         case Color.Black:
-            game.whitePieces.forEach( (piece : Piece) => {
-                if (piece.x !== undefined && piece.y !== undefined)
-                drawPieceGrid(piece, 7-piece.y, 7-piece.x);
-            })
-            game.blackPieces.forEach( (piece : Piece) => {
-                if (piece.x !== undefined && piece.y !== undefined)
-                drawPieceGrid(piece, 7-piece.y, 7-piece.x);
-            })
+            for (const piece of game.whitePieces) {
+                if (piece.x !== undefined && piece.y !== undefined && (
+                    !game.selecting
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    )    
+                ) {
+                    drawPieceGrid(piece, 7-piece.y, 7-piece.x);
+                }
+            }
+            for (const piece of game.blackPieces) {
+                if (piece.x !== undefined && piece.y !== undefined && (
+                    !game.selecting
+                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && game.selectedCell.piece.id !== piece.id) //don't draw the selected piece
+                    )    
+                ) {
+                    drawPieceGrid(piece, 7-piece.y, 7-piece.x);
+                }
+            }
             for (let y:number = 0; y < 8; y++) {
                 for (let x:number = 0; x < 8; x++) {
                     const cell = game.board.at(y, x)!
@@ -201,13 +182,8 @@ const drawBoard = (game : Game, playerColor : Color) : void => {
                     // if (cell.piece.hasMoved) {
                     //     colorCell(x, y, "#f80")
                     // }
-                    // if (cell.piece !== undefined)
-                    //     drawPieceGrid(cell.piece, 7-y, 7-x)
                 }
             }
-            // for (const piece of game.pieces) {
-            //     drawPieceGrid(piece.color, piece.type, piece.y, piece.x)
-            // }
         break;
         default:
             throw new Error("unreachable")
