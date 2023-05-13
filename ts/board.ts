@@ -7,7 +7,6 @@ class Cell {
     selected : boolean;
     marked : boolean;
     available : boolean;
-    inCheckBy : Set<Color>; //.add, .delete, .has
 
     constructor(x : number, y : number, piece ?: Piece) {
         this.y = y; //Row index
@@ -16,7 +15,6 @@ class Cell {
         this.selected = false;
         this.marked = false;
         this.available = false;
-        this.inCheckBy = new Set();
     }
 
     copy() : Cell {

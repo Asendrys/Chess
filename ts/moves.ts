@@ -264,7 +264,6 @@ function availableCells (game : Game, currX:number, currY:number, testInCheck:bo
             for (let row:number = currY-1; row <= currY+1; row++) {  
                 for (let col:number = currX-1; col <= currX+1; col++) {
                     if (inBoundaries(row, col) 
-                        // && !(board.at(row, col)!.inCheckBy.has(otherColor(currPiece.color)) )
                         && board.at(row, col)!.piece?.color !== currPiece.color) {
                             if (!testInCheck || !isInCheck(game, otherColor(currPiece.color), row, col)) //if testInCheck == false, then we don't do the 2nd part (checking), and conversely.
                                 availableCellsSet.add({x:col, y:row});
@@ -355,7 +354,7 @@ async function movePiece (game:Game, oldX:number, oldY:number, newX:number, newY
     //Test if pawn moved 2 cells
     piece.enPassantable = (piece.type === PieceType.Pawn && !piece.hasMoved && Math.abs(newY - oldY) === 2); //if it's pawn's first move two cells forwards.
 
-    let move;
+    let move : Move;
     //If castle
     if (piece.type === PieceType.King && !piece.hasMoved && Math.abs(oldX - newX) == 2) {
         const direction = oldX > newX ? 1 : -1; //1 : moves to the left, -1 : moves to the right

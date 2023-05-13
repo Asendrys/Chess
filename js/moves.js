@@ -242,7 +242,6 @@ function availableCells(game, currX, currY, testInCheck = true, customBoard) {
             for (let row = currY - 1; row <= currY + 1; row++) {
                 for (let col = currX - 1; col <= currX + 1; col++) {
                     if (inBoundaries(row, col)
-                        // && !(board.at(row, col)!.inCheckBy.has(otherColor(currPiece.color)) )
                         && ((_b = board.at(row, col).piece) === null || _b === void 0 ? void 0 : _b.color) !== currPiece.color) {
                         if (!testInCheck || !isInCheck(game, otherColor(currPiece.color), row, col)) //if testInCheck == false, then we don't do the 2nd part (checking), and conversely.
                             availableCellsSet.add({ x: col, y: row });

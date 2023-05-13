@@ -7,7 +7,6 @@ class Cell {
         this.selected = false;
         this.marked = false;
         this.available = false;
-        this.inCheckBy = new Set();
     }
     copy() {
         if (this.piece === undefined)
