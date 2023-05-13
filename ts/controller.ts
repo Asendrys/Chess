@@ -1,4 +1,4 @@
-function getCell(playerColor : Color, mouseX : number, mouseY : number) : {x:number, y:number} {
+function getCell(playerColor : Color, mouseX : number, mouseY : number) : coords {
     const rect = canvas.getBoundingClientRect();
     const xval = Math.floor((mouseX - rect.x) / squareSize);
     const yval = Math.floor((mouseY - rect.y) / squareSize);
@@ -22,14 +22,14 @@ function clickdown(event : MouseEvent) {
     update();
     event.preventDefault();
     if (event.button === 0) { //Only left click
-        const cell_coords : {x:number, y:number} = getCell(playerview, event.clientX, event.clientY);
+        const cell_coords = getCell(playerview, event.clientX, event.clientY);
         game.select(game.board.at(cell_coords.y, cell_coords.x)!);
     }
 }
 
 canvas.addEventListener('mousedown', clickdown);
 
-function computeAvailableCells(val: boolean, game: Game, cell_coords : {x:number, y:number}) : void {
+function computeAvailableCells(val: boolean, game: Game, cell_coords : coords) : void {
     for (const cell of availableCells(game, cell_coords.x, cell_coords.y)) {
         if (inBoundaries(cell.x, cell.y) )
             game.board.at(cell.y, cell.x)!.available = val;
@@ -55,7 +55,7 @@ function hover(event : MouseEvent) {
         && game.selectedCell.piece !== undefined) { // Selecting
         computeAvailableCells(true, game, game.selectedCell);
         const rect = canvas.getBoundingClientRect();
-        drawPieceAt(game.selectedCell.piece, 
+        drawPieceAt(ctx, game.selectedCell.piece, 
             Math.floor(event.clientY - rect.y - 0.5*squareSize), 
             Math.floor(event.clientX - rect.x - 0.5*squareSize)
         )
@@ -74,7 +74,7 @@ canvas.addEventListener('mousemove', hover);
 
 // canvas.addEventListener('touchstart', (event : TouchEvent) => {
 //     event.preventDefault();
-//     const cell_coords : {x:number, y:number} = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
+//     const cell_coords = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
 //     game.select(game.board.at(cell_coords.y, cell_coords.x)!)
 //     availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
 //         if (inBoundaries(cell.x, cell.y) )

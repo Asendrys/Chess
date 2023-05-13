@@ -38,6 +38,9 @@ class Piece {
             this.id = Piece.numPieces++;
         this.image = getImage(color, pieceType);
     }
+    copy() {
+        return new Piece(this.color, this.type, this.x, this.y, false);
+    }
     isEquals(otherPiece) {
         if (this.id === undefined || otherPiece.id === undefined)
             return false;

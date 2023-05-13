@@ -24,6 +24,14 @@ let width = canvas.width;
 let height = canvas.height;
 let squareSize = width / 8;
 const ctx = canvas.getContext("2d");
+/* // For testing purposes:
+const hiddenCanvas = document.querySelector("#hiddenBoard") as HTMLCanvasElement;
+
+hiddenCanvas.oncontextmenu = (event : Event) => {
+    event.preventDefault();
+};
+const hiddenCtx = hiddenCanvas.getContext("2d") as CanvasRenderingContext2D;
+*/
 // window.addEventListener("resize", (event) => {
 //     const size = Math.min(window.screen.width, window.screen.height)
 //     canvas.width = Math.floor(0.7 * size / 8) * 8
@@ -61,7 +69,7 @@ function getImageFromUrl(image_url) {
 function getImage(color, pieceType) {
     return getImageFromUrl(getImageUrl(color, pieceType));
 }
-function drawBoardBg() {
+function drawBoardBg(ctx) {
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             ctx.fillStyle = ((i + j) % 2) ? darkSquare : lightSquare;
@@ -69,7 +77,7 @@ function drawBoardBg() {
         }
     }
 }
-function drawPieceGrid(piece, y, x, bg) {
+function drawPieceGrid(ctx, piece, y, x, bg) {
     return __awaiter(this, void 0, void 0, function* () {
         yield piece.image.decode();
         if (bg !== undefined) {
@@ -79,19 +87,28 @@ function drawPieceGrid(piece, y, x, bg) {
         ctx.drawImage(piece.image, x * squareSize, y * squareSize, squareSize, squareSize);
     });
 }
-function drawPieceAt(piece, y, x) {
+function drawPieceAt(ctx, piece, y, x) {
     return __awaiter(this, void 0, void 0, function* () {
         yield piece.image.decode();
         ctx.drawImage(piece.image, x, y, squareSize, squareSize);
     });
 }
-function drawPromotion(prom) {
-    drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor);
-    drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor);
-    drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor);
-    drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor);
+function drawPromotion(ctx, prom) {
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor);
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor);
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor);
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor);
 }
-function drawBoard(game, playerColor) {
+function drawBoard(ctx, board) {
+    for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+            const p = board.at(y, x).piece;
+            if (p !== undefined)
+                drawPieceGrid(ctx, p, y, x);
+        }
+    }
+}
+function drawGameBoard(ctx, game, playerColor) {
     switch (playerColor) {
         case Color.White:
             for (const piece of game.whitePieces) {
@@ -103,7 +120,7 @@ function drawBoard(game, playerColor) {
                             && game.selectedCell.piece !== undefined
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )) {
-                    drawPieceGrid(piece, piece.y, piece.x);
+                    drawPieceGrid(ctx, piece, piece.y, piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
@@ -115,7 +132,7 @@ function drawBoard(game, playerColor) {
                             && game.selectedCell.piece !== undefined
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )) {
-                    drawPieceGrid(piece, piece.y, piece.x);
+                    drawPieceGrid(ctx, piece, piece.y, piece.x);
                 }
             }
             for (let y = 0; y < 8; y++) {
@@ -143,7 +160,7 @@ function drawBoard(game, playerColor) {
                             && game.selectedCell.piece !== undefined
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )) {
-                    drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
+                    drawPieceGrid(ctx, piece, 7 - piece.y, 7 - piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
@@ -155,7 +172,7 @@ function drawBoard(game, playerColor) {
                             && game.selectedCell.piece !== undefined
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )) {
-                    drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
+                    drawPieceGrid(ctx, piece, 7 - piece.y, 7 - piece.x);
                 }
             }
             for (let y = 0; y < 8; y++) {
@@ -183,11 +200,11 @@ function colorCell(x, y, color) {
 }
 //Draw
 function updateView() {
-    drawBoardBg();
-    drawBoard(game, playerview);
+    drawBoardBg(ctx);
+    drawGameBoard(ctx, game, playerview);
     for (const elt of toDraw) {
         if (elt instanceof Promotion) {
-            drawPromotion(elt);
+            drawPromotion(ctx, elt);
         }
     }
 }

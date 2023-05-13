@@ -60,7 +60,7 @@ function hover(event) {
         && game.selectedCell.piece !== undefined) { // Selecting
         computeAvailableCells(true, game, game.selectedCell);
         const rect = canvas.getBoundingClientRect();
-        drawPieceAt(game.selectedCell.piece, Math.floor(event.clientY - rect.y - 0.5 * squareSize), Math.floor(event.clientX - rect.x - 0.5 * squareSize));
+        drawPieceAt(ctx, game.selectedCell.piece, Math.floor(event.clientY - rect.y - 0.5 * squareSize), Math.floor(event.clientX - rect.x - 0.5 * squareSize));
     }
 }
 canvas.addEventListener('mousemove', hover);
@@ -72,7 +72,7 @@ canvas.addEventListener('mousemove', hover);
 // })
 // canvas.addEventListener('touchstart', (event : TouchEvent) => {
 //     event.preventDefault();
-//     const cell_coords : {x:number, y:number} = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
+//     const cell_coords = getCell(playerview, event.touches[0].clientX, event.touches[0].clientY )
 //     game.select(game.board.at(cell_coords.y, cell_coords.x)!)
 //     availableCells(game, cell_coords.x, cell_coords.y).forEach(cell => {
 //         if (inBoundaries(cell.x, cell.y) )

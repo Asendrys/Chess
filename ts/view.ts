@@ -23,6 +23,15 @@ let squareSize : number = width / 8;
 
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
+/* // For testing purposes:
+const hiddenCanvas = document.querySelector("#hiddenBoard") as HTMLCanvasElement;
+
+hiddenCanvas.oncontextmenu = (event : Event) => {
+    event.preventDefault();
+};
+const hiddenCtx = hiddenCanvas.getContext("2d") as CanvasRenderingContext2D;
+*/
+
 // window.addEventListener("resize", (event) => {
 //     const size = Math.min(window.screen.width, window.screen.height)
 //     canvas.width = Math.floor(0.7 * size / 8) * 8
@@ -70,7 +79,7 @@ function getImage(color : Color, pieceType : PieceType) : HTMLImageElement{
     return getImageFromUrl(getImageUrl(color, pieceType));
 }
 
-function drawBoardBg () : void {
+function drawBoardBg (ctx:CanvasRenderingContext2D) : void {
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             ctx.fillStyle = ((i+j)%2) ? darkSquare : lightSquare;
@@ -79,7 +88,7 @@ function drawBoardBg () : void {
     }
 }
 
-async function drawPieceGrid (piece : Piece, y:number, x:number, bg?:string) : Promise<void> {
+async function drawPieceGrid (ctx : CanvasRenderingContext2D, piece : Piece, y:number, x:number, bg?:string) : Promise<void> {
     await piece.image.decode();
     if (bg !== undefined) {
         ctx.fillStyle = bgColor;
@@ -88,19 +97,29 @@ async function drawPieceGrid (piece : Piece, y:number, x:number, bg?:string) : P
     ctx.drawImage(piece.image, x*squareSize, y*squareSize, squareSize, squareSize);
 }
 
-async function drawPieceAt (piece : Piece, y : number, x : number) : Promise<void> {
+async function drawPieceAt (ctx:CanvasRenderingContext2D, piece : Piece, y : number, x : number) : Promise<void> {
     await piece.image.decode();
     ctx.drawImage(piece.image, x, y, squareSize, squareSize);
 }
 
-function drawPromotion (prom : Promotion): void {
-    drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor)
-    drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor)
-    drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor)
-    drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor)
+function drawPromotion (ctx:CanvasRenderingContext2D, prom : Promotion): void {
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor)
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor)
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor)
+    drawPieceGrid(ctx, new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor)
 }
 
-function drawBoard (game : Game, playerColor : Color) : void {
+function drawBoard(ctx:CanvasRenderingContext2D, board : Board) {
+    for (let y = 0; y < 8 ; y++) {
+        for (let x = 0; x < 8 ; x++) {
+            const p = board.at(y, x)!.piece;
+            if (p !== undefined)
+                drawPieceGrid(ctx, p, y, x);
+        }
+    }
+}
+
+function drawGameBoard (ctx:CanvasRenderingContext2D, game : Game, playerColor : Color) : void {
     switch (playerColor) {
         case Color.White:
             for (const piece of game.whitePieces) {
@@ -114,7 +133,7 @@ function drawBoard (game : Game, playerColor : Color) : void {
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )    
                 ) {
-                    drawPieceGrid(piece, piece.y, piece.x);
+                    drawPieceGrid(ctx, piece, piece.y, piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
@@ -128,7 +147,7 @@ function drawBoard (game : Game, playerColor : Color) : void {
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )    
                 ) {
-                    drawPieceGrid(piece, piece.y, piece.x);
+                    drawPieceGrid(ctx, piece, piece.y, piece.x);
                 }
             }
             for (let y = 0; y < 8; y++) {
@@ -160,7 +179,7 @@ function drawBoard (game : Game, playerColor : Color) : void {
                             && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
                     )    
                 ) {
-                    drawPieceGrid(piece, 7-piece.y, 7-piece.x);
+                    drawPieceGrid(ctx, piece, 7-piece.y, 7-piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
@@ -176,7 +195,7 @@ function drawBoard (game : Game, playerColor : Color) : void {
                             ) //don't draw the selected piece
                         )    
                 ) {
-                    drawPieceGrid(piece, 7-piece.y, 7-piece.x);
+                    drawPieceGrid(ctx, piece, 7-piece.y, 7-piece.x);
                 }
             }
             for (let y:number = 0; y < 8; y++) {
@@ -207,12 +226,12 @@ function colorCell (x:number, y:number, color:string):void {
 
 //Draw
 function updateView():void {
-    drawBoardBg();
-    drawBoard(game, playerview);
+    drawBoardBg(ctx);
+    drawGameBoard(ctx, game, playerview);
 
     for (const elt of toDraw) {
         if (elt instanceof Promotion) {
-            drawPromotion(elt);
+            drawPromotion(ctx, elt);
         }
     }
 

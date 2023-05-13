@@ -46,6 +46,10 @@ class Piece {
             this.id = Piece.numPieces++;
         this.image = getImage(color, pieceType);
     }
+
+    copy() : Piece {
+        return new Piece(this.color, this.type, this.x, this.y, false);
+    }
     
     isEquals(otherPiece : Piece) {
         if (this.id === undefined || otherPiece.id === undefined) 

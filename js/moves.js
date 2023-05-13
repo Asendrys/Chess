@@ -48,14 +48,15 @@ class Move {
     }
 }
 Move.n_moves = 0;
-function isInCheck(game, byColor, y, x) {
+function isInCheck(game, byColor, y, x, otherBoard) {
+    const board = (otherBoard === undefined) ? game.board : otherBoard;
     if (!inBoundaries(x, y))
         return false;
     const piecesOfColor = (byColor === Color.Black) ? game.blackPieces : game.whitePieces;
     for (const piece of piecesOfColor) {
         if (piece.isOut)
             break;
-        if ([...availableCells(game, piece.x, piece.y, false)].some((cell) => { return cell.x === x && cell.y === y; })) {
+        if ([...availableCells(game, piece.x, piece.y, false, board)].some((cell) => { return cell.x === x && cell.y === y; })) {
             return true;
         }
     }
@@ -75,12 +76,12 @@ function dirAvailableCells(board, out, currPiece, blocked, x, y) {
     var _a, _b;
     if (!blocked && inBoundaries(x, y)) {
         const mayBlock = board.at(y, x);
-        if (((_a = mayBlock.piece) === null || _a === void 0 ? void 0 : _a.color) === currPiece.color) { //if blocked by same color piece
+        if (((_a = mayBlock === null || mayBlock === void 0 ? void 0 : mayBlock.piece) === null || _a === void 0 ? void 0 : _a.color) === currPiece.color) { //if blocked by same color piece
             blocked = true;
         }
         else
             out.push({ x: x, y: y });
-        if (((_b = mayBlock.piece) === null || _b === void 0 ? void 0 : _b.color) === otherColor(currPiece.color)) { //if blocked by other color piece
+        if (((_b = mayBlock === null || mayBlock === void 0 ? void 0 : mayBlock.piece) === null || _b === void 0 ? void 0 : _b.color) === otherColor(currPiece.color)) { //if blocked by other color piece
             blocked = true;
         }
     }
@@ -89,6 +90,8 @@ function dirAvailableCells(board, out, currPiece, blocked, x, y) {
 function straightAvailableCells(board, currX, currY) {
     const out = [];
     const currPiece = board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`straightAvailableCells: piece in x=${currX}, y=${currY} is undefined`);
     let westBlocked = false;
     let eastBlocked = false;
     let northBlocked = false;
@@ -104,6 +107,8 @@ function straightAvailableCells(board, currX, currY) {
 function diagAvailableCells(board, currX, currY) {
     const out = [];
     const currPiece = board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`diagAvailableCells: piece at x=${currX}, y=${currY} is undefined`);
     let nwBlocked = false;
     let neBlocked = false;
     let swBlocked = false;
@@ -117,65 +122,60 @@ function diagAvailableCells(board, currX, currY) {
     return out;
 }
 function pushForwardAvaibleCell(board, currX, currY) {
-    var _a;
     const currPiece = board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`pushForwardAvaibleCell: piece at x= ${currX}, y=${currY} is undefined`);
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
-    if (!((_a = board.at(currY + forwardDir, currX)) === null || _a === void 0 ? void 0 : _a.piece))
+    if (!board.at(currY + forwardDir, currX).piece)
         return [{ x: currX, y: currY + forwardDir }];
     return [];
 }
 function startPushForwardAvaibleCell(board, currX, currY) {
-    var _a;
     const currPiece = board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`startPushForwardAvaibleCell: piece at x= ${currX}, y=${currY} is undefined`);
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     if (!currPiece.hasMoved
-        && ((_a = board.at(currY + forwardDir, currX)) === null || _a === void 0 ? void 0 : _a.piece) === undefined)
+        && board.at(currY + forwardDir, currX).piece === undefined)
         return [{ x: currX, y: currY + 2 * forwardDir }];
     return [];
 }
 function takeDiagonalForwardAvailableCell(board, currX, currY) {
     const currPiece = board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`takeDiagonalForwardAvailableCell: piece at x= ${currX}, y=${currY} is undefined`);
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     const out = [];
-    if (inBoundaries(currX + 1, currY + forwardDir)) {
-        const diagRight = board.at(currY + forwardDir, currX + 1).piece;
-        if (diagRight !== undefined && diagRight.color === otherColor(currPiece.color))
-            out.push({ x: currX + 1, y: currY + forwardDir });
-    }
-    if (inBoundaries(currX - 1, currY + forwardDir)) {
-        const diagLeft = board.at(currY + forwardDir, currX - 1).piece;
-        if (diagLeft !== undefined && diagLeft.color === otherColor(currPiece.color))
-            out.push({ x: currX - 1, y: currY + forwardDir });
+    for (const offset of [1, -1]) { //previously : offset = +1 -> diagRight ; = -1 -> diagLeft
+        if (inBoundaries(currX + offset, currY + forwardDir)) {
+            const diagOffset = board.at(currY + forwardDir, currX + offset).piece;
+            if (diagOffset !== undefined && diagOffset.color === otherColor(currPiece.color))
+                out.push({ x: currX + offset, y: currY + forwardDir });
+        }
     }
     return out;
 }
 function enPassantAvailableCell(game, currX, currY) {
     const currPiece = game.board.at(currY, currX).piece;
+    if (currPiece === undefined)
+        throw new Error(`enPassantAvailableCell: piece at x= ${currX}, y=${currY} is undefined`);
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     const lastMove = game.getLastMove();
     if (lastMove === null)
         return [];
     const lastPieceMoved = lastMove.pieceMoved;
     const out = [];
-    if (inBoundaries(currX + 1, currY + forwardDir) && inBoundaries(currX + 1, currY)) {
-        const rightPiece = game.board.at(currY, currX + 1).piece;
-        if (game.board.at(currY + forwardDir, currX + 1).piece === undefined //if no piece on diagonal
-            && rightPiece !== undefined
-            && rightPiece.color === otherColor(currPiece.color) //if opponent's pawn to currPiece side
-            && lastPieceMoved.isEquals(rightPiece) //if it is the last piece moved
-            && lastPieceMoved.enPassantable //if it just made an en passant
-        )
-            out.push({ x: currX + 1, y: currY + forwardDir });
-    }
-    if (inBoundaries(currX - 1, currY + forwardDir) && inBoundaries(currX - 1, currY)) {
-        const leftPiece = game.board.at(currY, currX - 1).piece;
-        if (game.board.at(currY + forwardDir, currX - 1).piece === undefined //if no piece on diagonal
-            && leftPiece !== undefined
-            && leftPiece.color === otherColor(currPiece.color) //if opponent's pawn to currPiece side
-            && lastPieceMoved.isEquals(leftPiece) //if it is the last piece moved
-            && lastPieceMoved.enPassantable //if it just made an en passant
-        )
-            out.push({ x: currX - 1, y: currY + forwardDir });
+    for (const offset of [1, -1]) {
+        if (inBoundaries(currX + offset, currY + forwardDir) && inBoundaries(currX + offset, currY)) {
+            const offsetPiece = game.board.at(currY, currX + offset).piece; //previously : offset = +1 -> rightPiece ; = -1 -> leftPiece
+            if (game.board.at(currY + forwardDir, currX + offset).piece === undefined //if no piece on diagonal
+                && offsetPiece !== undefined
+                && offsetPiece.color === otherColor(currPiece.color) //if opponent's pawn to currPiece side
+                && lastPieceMoved.isEquals(offsetPiece) //if it is the last piece moved
+                && lastPieceMoved.enPassantable //if it just made an en passant
+            )
+                out.push({ x: currX + offset, y: currY + forwardDir });
+        }
     }
     return out;
 }
@@ -201,9 +201,9 @@ function concatSetAndArray(A, B) {
 function concatArraysToSet(A, B) {
     return new Set([...A, ...B]);
 }
-function availableCells(game, currX, currY, testInCheck = true) {
+function availableCells(game, currX, currY, testInCheck = true, customBoard) {
     var _a, _b;
-    const board = game.board;
+    const board = (customBoard === undefined) ? game.board : customBoard;
     let availableCellsSet = new Set();
     //TODO : king in check, etc
     if (board.at(currY, currX) === undefined)
@@ -242,9 +242,11 @@ function availableCells(game, currX, currY, testInCheck = true) {
             for (let row = currY - 1; row <= currY + 1; row++) {
                 for (let col = currX - 1; col <= currX + 1; col++) {
                     if (inBoundaries(row, col)
-                        && !board.at(row, col).inCheckBy.has(otherColor(currPiece.color))
-                        && ((_b = board.at(row, col).piece) === null || _b === void 0 ? void 0 : _b.color) !== currPiece.color)
-                        availableCellsSet.add({ x: col, y: row });
+                        // && !(board.at(row, col)!.inCheckBy.has(otherColor(currPiece.color)) )
+                        && ((_b = board.at(row, col).piece) === null || _b === void 0 ? void 0 : _b.color) !== currPiece.color) {
+                        if (!testInCheck || !isInCheck(game, otherColor(currPiece.color), row, col)) //if testInCheck == false, then we don't do the 2nd part (checking), and conversely.
+                            availableCellsSet.add({ x: col, y: row });
+                    }
                 }
             }
             if (!currPiece.hasMoved) {
@@ -257,15 +259,25 @@ function availableCells(game, currX, currY, testInCheck = true) {
         default:
             throw new Error("Unreachable");
     }
-    if (testInCheck) { //to fix : with MoveType.
+    if (testInCheck) {
         const color = currPiece.color;
-        const king = (color === Color.White) ? game.whiteKing : game.blackKing;
+        let king = (color === Color.White) ? game.whiteKing : game.blackKing;
         for (const cell of availableCellsSet) {
-            // boardMovePiece(board, currX, currY, cell.x, cell.y, false)
-            if (isInCheck(game, otherColor(color), king.y, king.x)) {
+            const hiddenBoard = game.board.copy();
+            // if (hiddenBoard.at(currX, currY)!.piece !== undefined)
+            boardMovePiece(hiddenBoard, currX, currY, cell.x, cell.y);
+            if (hiddenBoard.at(cell.y, cell.x).piece.type === PieceType.King) { //moved piece is the king
+                if (isInCheck(game, otherColor(color), cell.y, cell.x, hiddenBoard)) {
+                    availableCellsSet.delete(cell);
+                }
+                break;
+            }
+            if (isInCheck(game, otherColor(color), king.y, king.x, hiddenBoard)) {
                 availableCellsSet.delete(cell);
             }
-            // boardMovePiece(board, cell.x, cell.y, currX, currY, false)
+            // Testing :
+            // drawBoardBg(hiddenCtx);
+            // drawBoard(hiddenCtx, hiddenBoard);
         }
     }
     return availableCellsSet;
@@ -279,16 +291,17 @@ function removePiece(board, x, y) {
     oldCell.piece.isOut = true;
     oldCell.piece = undefined;
 }
-function boardMovePiece(board, oldX, oldY, targetX, targetY, sideEffects = true) {
+function boardMovePiece(board, oldX, oldY, targetX, targetY) {
     //Only manages changing the position of a piece on the board, regardless of other aspects, for that, see movePiece.
     if (!inBoundaries(targetX, targetY) || !inBoundaries(oldX, oldY))
         return;
-    board.at(oldY, oldX).piece.x = targetX;
-    board.at(oldY, oldX).piece.y = targetY;
-    if (sideEffects)
-        board.at(oldY, oldX).piece.hasMoved = true;
-    //endif
-    board.at(targetY, targetX).piece = board.at(oldY, oldX).piece; //new cell
+    const piece = board.at(oldY, oldX).piece;
+    if (piece === undefined) {
+        return; //throw new Error(`boardMovePiece: piece at oldX=${oldX}, oldY=${oldY} is undefined`);
+    }
+    piece.x = targetX;
+    piece.y = targetY;
+    board.at(targetY, targetX).piece = piece; //new cell
     board.at(oldY, oldX).piece = undefined; //old cell
 }
 function promotion(piece, newPieceType) {
