@@ -21,11 +21,11 @@ class Cell {
 class Board {
     elts : Array<Array<Cell>>;
     constructor() {
-        this.elts = Array(8).fill(null)
+        this.elts = Array(8).fill(null);
         for (let row = 0; row < 8 ; row++) {
-            this.elts[row] = Array(8).fill(null)
+            this.elts[row] = Array(8).fill(null);
             for (let col = 0; col < 8; col++) {
-                this.elts[row][col] = new Cell(col, row)
+                this.elts[row][col] = new Cell(col, row);
             }
         }
     
@@ -57,11 +57,12 @@ class Board {
     at(y:number, x:number) : Cell|undefined {
         if (!inBoundaries(x, y))
             return;
-        return this.elts[y][x]
+        return this.elts[y][x];
     }
     
 };
+type coord = 0|1|2|3|4|5|6|7;
 
-const inBoundaries = (x : number, y : number) : boolean => {
-    return 0 <= x && x < 8 && 0 <= y && y < 8
+function inBoundaries(x : number, y : number) : boolean {
+    return 0 <= x && x < 8 && 0 <= y && y < 8;
 }

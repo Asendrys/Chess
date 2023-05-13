@@ -1,16 +1,16 @@
 enum Color {
     Black,
     White,
-}
+};
 
-const otherColor = (color:Color) : Color => {
+function otherColor(color:Color) : Color {
     switch (color) {
         case Color.Black:
-            return Color.White
+            return Color.White;
         case Color.White:
-            return Color.Black
+            return Color.Black;
         default:
-            throw new Error("unreachable")
+            throw new Error("unreachable");
     }
 }
 
@@ -21,7 +21,7 @@ enum PieceType {
     Bishop,
     Knight,
     Pawn,
-}
+};
 
 class Piece {
     static numPieces:number = 0;
@@ -48,7 +48,8 @@ class Piece {
     }
     
     isEquals(otherPiece : Piece) {
-        if (this.id === undefined || otherPiece.id === undefined) return false;
+        if (this.id === undefined || otherPiece.id === undefined) 
+            return false;
         return (this.id === otherPiece.id);
     }
-}
+};

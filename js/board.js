@@ -47,6 +47,6 @@ class Board {
     }
 }
 ;
-const inBoundaries = (x, y) => {
+function inBoundaries(x, y) {
     return 0 <= x && x < 8 && 0 <= y && y < 8;
-};
+}

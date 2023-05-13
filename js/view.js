@@ -17,7 +17,7 @@ function clearMessage() {
     msg.innerHTML = "&nbsp;"; //Default message
 }
 const canvas = document.querySelector("#board");
-canvas.oncontextmenu = function (event) {
+canvas.oncontextmenu = (event) => {
     event.preventDefault();
 };
 let width = canvas.width;
@@ -41,79 +41,80 @@ const markColor = "rgba(0, 96, 256, 0.5)";
 const availableColor = "rgba(0, 256, 96, 0.5)";
 const img_prefix = "./img/Chess_";
 const img_suffix = "t45.svg";
-const getImageUrl = (color, pieceType) => {
-    switch (color) {
-        case Color.Black:
-            switch (pieceType) {
-                case PieceType.King: return img_prefix + "kd" + img_suffix;
-                case PieceType.Queen: return img_prefix + "qd" + img_suffix;
-                case PieceType.Rook: return img_prefix + "rd" + img_suffix;
-                case PieceType.Bishop: return img_prefix + "bd" + img_suffix;
-                case PieceType.Knight: return img_prefix + "nd" + img_suffix;
-                case PieceType.Pawn: return img_prefix + "pd" + img_suffix;
-                default: throw new Error("Unreachable");
-            }
-        case Color.White:
-            switch (pieceType) {
-                case PieceType.King: return img_prefix + "kl" + img_suffix;
-                case PieceType.Queen: return img_prefix + "ql" + img_suffix;
-                case PieceType.Rook: return img_prefix + "rl" + img_suffix;
-                case PieceType.Bishop: return img_prefix + "bl" + img_suffix;
-                case PieceType.Knight: return img_prefix + "nl" + img_suffix;
-                case PieceType.Pawn: return img_prefix + "pl" + img_suffix;
-                default: throw new Error("Unreachable");
-            }
+function getImageUrl(color, pieceType) {
+    const color_suffix = (color === Color.Black ? "d" : "l");
+    switch (pieceType) {
+        case PieceType.King: return img_prefix + "k" + color_suffix + img_suffix;
+        case PieceType.Queen: return img_prefix + "q" + color_suffix + img_suffix;
+        case PieceType.Rook: return img_prefix + "r" + color_suffix + img_suffix;
+        case PieceType.Bishop: return img_prefix + "b" + color_suffix + img_suffix;
+        case PieceType.Knight: return img_prefix + "n" + color_suffix + img_suffix;
+        case PieceType.Pawn: return img_prefix + "p" + color_suffix + img_suffix;
         default: throw new Error("Unreachable");
     }
-};
-const getImageFromUrl = (image_url) => {
+}
+function getImageFromUrl(image_url) {
     const img = new Image();
     img.src = image_url;
     return img;
-};
-const getImage = (color, pieceType) => {
+}
+function getImage(color, pieceType) {
     return getImageFromUrl(getImageUrl(color, pieceType));
-};
-const drawBoardBg = () => {
+}
+function drawBoardBg() {
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             ctx.fillStyle = ((i + j) % 2) ? darkSquare : lightSquare;
             ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize);
         }
     }
-};
-const drawPieceGrid = (piece, y, x, bg) => __awaiter(void 0, void 0, void 0, function* () {
-    yield piece.image.decode();
-    if (bg !== undefined) {
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
-    }
-    ctx.drawImage(piece.image, x * squareSize, y * squareSize, squareSize, squareSize);
-});
-const drawPieceAt = (piece, y, x) => __awaiter(void 0, void 0, void 0, function* () {
-    yield piece.image.decode();
-    ctx.drawImage(piece.image, x, y, squareSize, squareSize);
-});
-const drawPromotion = (prom) => {
+}
+function drawPieceGrid(piece, y, x, bg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield piece.image.decode();
+        if (bg !== undefined) {
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+        }
+        ctx.drawImage(piece.image, x * squareSize, y * squareSize, squareSize, squareSize);
+    });
+}
+function drawPieceAt(piece, y, x) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield piece.image.decode();
+        ctx.drawImage(piece.image, x, y, squareSize, squareSize);
+    });
+}
+function drawPromotion(prom) {
     drawPieceGrid(new Piece(prom.color, PieceType.Queen, undefined, undefined, false), prom.queenY, prom.file, bgColor);
     drawPieceGrid(new Piece(prom.color, PieceType.Rook, undefined, undefined, false), prom.rookY, prom.file, bgColor);
     drawPieceGrid(new Piece(prom.color, PieceType.Bishop, undefined, undefined, false), prom.bishopY, prom.file, bgColor);
     drawPieceGrid(new Piece(prom.color, PieceType.Knight, undefined, undefined, false), prom.knightY, prom.file, bgColor);
-};
-const drawBoard = (game, playerColor) => {
+}
+function drawBoard(game, playerColor) {
     switch (playerColor) {
         case Color.White:
             for (const piece of game.whitePieces) {
-                if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
-                )) {
+                if (piece.x !== undefined
+                    && piece.y !== undefined
+                    && (!game.selecting
+                        || (game.selecting
+                            && game.selectedCell !== null
+                            && game.selectedCell.piece !== undefined
+                            && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
+                    )) {
                     drawPieceGrid(piece, piece.y, piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
-                if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
-                )) {
+                if (piece.x !== undefined
+                    && piece.y !== undefined
+                    && (!game.selecting
+                        || (game.selecting
+                            && game.selectedCell !== null
+                            && game.selectedCell.piece !== undefined
+                            && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
+                    )) {
                     drawPieceGrid(piece, piece.y, piece.x);
                 }
             }
@@ -127,23 +128,33 @@ const drawBoard = (game, playerColor) => {
                         colorCell(x, y, availableColor);
                     }
                     // if (cell.piece.hasMoved) {
-                    //     colorCell(x, y, "#f80")
+                    //     colorCell(x, y, "#f80");
                     // }
                 }
             }
             break;
         case Color.Black:
             for (const piece of game.whitePieces) {
-                if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
-                )) {
+                if (piece.x !== undefined
+                    && piece.y !== undefined
+                    && (!game.selecting
+                        || (game.selecting
+                            && game.selectedCell !== null
+                            && game.selectedCell.piece !== undefined
+                            && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
+                    )) {
                     drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
                 }
             }
             for (const piece of game.blackPieces) {
-                if (piece.x !== undefined && piece.y !== undefined && (!game.selecting
-                    || (game.selecting && game.selectedCell !== null && game.selectedCell.piece !== undefined && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
-                )) {
+                if (piece.x !== undefined
+                    && piece.y !== undefined
+                    && (!game.selecting
+                        || (game.selecting
+                            && game.selectedCell !== null
+                            && game.selectedCell.piece !== undefined
+                            && !game.selectedCell.piece.isEquals(piece)) //don't draw the selected piece
+                    )) {
                     drawPieceGrid(piece, 7 - piece.y, 7 - piece.x);
                 }
             }
@@ -157,7 +168,7 @@ const drawBoard = (game, playerColor) => {
                         colorCell(7 - x, 7 - y, availableColor);
                     }
                     // if (cell.piece.hasMoved) {
-                    //     colorCell(x, y, "#f80")
+                    //     colorCell(x, y, "#f80");
                     // }
                 }
             }
@@ -165,11 +176,11 @@ const drawBoard = (game, playerColor) => {
         default:
             throw new Error("unreachable");
     }
-};
-const colorCell = (x, y, color) => {
+}
+function colorCell(x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
-};
+}
 //Draw
 function updateView() {
     drawBoardBg();

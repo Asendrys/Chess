@@ -18,7 +18,8 @@ var MoveType;
     MoveType[MoveType["PIECE_MOVE"] = 5] = "PIECE_MOVE";
     MoveType[MoveType["PIECE_TAKES"] = 6] = "PIECE_TAKES";
     MoveType[MoveType["CASTLE"] = 7] = "CASTLE";
-})(MoveType || (MoveType = {})); //Todo.
+})(MoveType || (MoveType = {}));
+; //Todo.
 class Move {
     constructor(game, oldX, oldY, targetX, targetY, enPassantX, enPassantY, castleTargetX, incrementCounter = true) {
         //castleTargetX is the file containing the rook to castle
@@ -47,36 +48,30 @@ class Move {
     }
 }
 Move.n_moves = 0;
-const isInCheck = (game, byColor, y, x) => {
+function isInCheck(game, byColor, y, x) {
     if (!inBoundaries(x, y))
         return false;
-    switch (byColor) {
-        case Color.Black:
-            //iterating through the black pieces
-            for (const blackPiece of game.blackPieces) {
-                if (blackPiece.isOut)
-                    break;
-                if ([...availableCells(game, blackPiece.x, blackPiece.y, false)].some((cell) => { return cell.x === x && cell.y === y; })) {
-                    return true;
-                }
-            }
+    const piecesOfColor = (byColor === Color.Black) ? game.blackPieces : game.whitePieces;
+    for (const piece of piecesOfColor) {
+        if (piece.isOut)
             break;
-        case Color.White:
-            //iterating through the white pieces
-            for (const whitePiece of game.whitePieces) {
-                if (whitePiece.isOut)
-                    break;
-                if ([...availableCells(game, whitePiece.x, whitePiece.y, false)].some((cell) => { return cell.x === x && cell.y === y; })) {
-                    return true;
-                }
-            }
-            break;
-        default:
-            throw new Error("unreachable");
+        if ([...availableCells(game, piece.x, piece.y, false)].some((cell) => { return cell.x === x && cell.y === y; })) {
+            return true;
+        }
     }
     return false;
-};
-const dirAvailableCells = (board, out, currPiece, blocked, x, y) => {
+}
+/**
+ *
+ * @param board Board
+ * @param out Array of available cells
+ * @param currPiece
+ * @param blocked
+ * @param x
+ * @param y
+ * @returns cell at (x, y) is available. Modifies out. Used in straightAvailableCells().
+ */
+function dirAvailableCells(board, out, currPiece, blocked, x, y) {
     var _a, _b;
     if (!blocked && inBoundaries(x, y)) {
         const mayBlock = board.at(y, x);
@@ -90,8 +85,8 @@ const dirAvailableCells = (board, out, currPiece, blocked, x, y) => {
         }
     }
     return blocked;
-};
-const straightAvailableCells = (board, currX, currY) => {
+}
+function straightAvailableCells(board, currX, currY) {
     const out = [];
     const currPiece = board.at(currY, currX).piece;
     let westBlocked = false;
@@ -105,8 +100,8 @@ const straightAvailableCells = (board, currX, currY) => {
         eastBlocked = dirAvailableCells(board, out, currPiece, eastBlocked, currX + offset, currY);
     }
     return out;
-};
-const diagAvailableCells = (board, currX, currY) => {
+}
+function diagAvailableCells(board, currX, currY) {
     const out = [];
     const currPiece = board.at(currY, currX).piece;
     let nwBlocked = false;
@@ -120,16 +115,16 @@ const diagAvailableCells = (board, currX, currY) => {
         swBlocked = dirAvailableCells(board, out, currPiece, swBlocked, currX - offset, currY + offset);
     }
     return out;
-};
-const pushForwardAvaibleCell = (board, currX, currY) => {
+}
+function pushForwardAvaibleCell(board, currX, currY) {
     var _a;
     const currPiece = board.at(currY, currX).piece;
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     if (!((_a = board.at(currY + forwardDir, currX)) === null || _a === void 0 ? void 0 : _a.piece))
         return [{ x: currX, y: currY + forwardDir }];
     return [];
-};
-const startPushForwardAvaibleCell = (board, currX, currY) => {
+}
+function startPushForwardAvaibleCell(board, currX, currY) {
     var _a;
     const currPiece = board.at(currY, currX).piece;
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
@@ -137,8 +132,8 @@ const startPushForwardAvaibleCell = (board, currX, currY) => {
         && ((_a = board.at(currY + forwardDir, currX)) === null || _a === void 0 ? void 0 : _a.piece) === undefined)
         return [{ x: currX, y: currY + 2 * forwardDir }];
     return [];
-};
-const takeDiagonalForwardAvailableCell = (board, currX, currY) => {
+}
+function takeDiagonalForwardAvailableCell(board, currX, currY) {
     const currPiece = board.at(currY, currX).piece;
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     const out = [];
@@ -153,8 +148,8 @@ const takeDiagonalForwardAvailableCell = (board, currX, currY) => {
             out.push({ x: currX - 1, y: currY + forwardDir });
     }
     return out;
-};
-const enPassantAvailableCell = (game, currX, currY) => {
+}
+function enPassantAvailableCell(game, currX, currY) {
     const currPiece = game.board.at(currY, currX).piece;
     const forwardDir = currPiece.color === Color.Black ? 1 : -1;
     const lastMove = game.getLastMove();
@@ -183,8 +178,8 @@ const enPassantAvailableCell = (game, currX, currY) => {
             out.push({ x: currX - 1, y: currY + forwardDir });
     }
     return out;
-};
-const isCastlePossible = (board, currX, currY, targetX) => {
+}
+function isCastlePossible(board, currX, currY, targetX) {
     var _a, _b;
     if (((_a = board.at(currY, targetX).piece) === null || _a === void 0 ? void 0 : _a.type) === PieceType.Rook && !((_b = board.at(currY, targetX).piece) === null || _b === void 0 ? void 0 : _b.hasMoved)) {
         //test if no check in between
@@ -196,8 +191,17 @@ const isCastlePossible = (board, currX, currY, targetX) => {
         return true;
     }
     return false;
-};
-const availableCells = (game, currX, currY, testInCheck = true) => {
+}
+function arrayToSet(arr) {
+    return new Set([...arr]);
+}
+function concatSetAndArray(A, B) {
+    return new Set([...A, ...B]);
+}
+function concatArraysToSet(A, B) {
+    return new Set([...A, ...B]);
+}
+function availableCells(game, currX, currY, testInCheck = true) {
     var _a, _b;
     const board = game.board;
     let availableCellsSet = new Set();
@@ -209,11 +213,11 @@ const availableCells = (game, currX, currY, testInCheck = true) => {
         return availableCellsSet;
     switch (currPiece.type) {
         case PieceType.Pawn:
-            availableCellsSet = new Set([...availableCellsSet, ...pushForwardAvaibleCell(board, currX, currY)]);
+            availableCellsSet = concatSetAndArray(availableCellsSet, pushForwardAvaibleCell(board, currX, currY));
             if (availableCells.length > 0) //if forward is available
-                availableCellsSet = new Set([...availableCellsSet, ...startPushForwardAvaibleCell(board, currX, currY)]);
-            availableCellsSet = new Set([...availableCellsSet, ...takeDiagonalForwardAvailableCell(board, currX, currY)]);
-            availableCellsSet = new Set([...availableCellsSet, ...enPassantAvailableCell(game, currX, currY)]);
+                availableCellsSet = concatSetAndArray(availableCellsSet, startPushForwardAvaibleCell(board, currX, currY));
+            availableCellsSet = concatSetAndArray(availableCellsSet, takeDiagonalForwardAvailableCell(board, currX, currY));
+            availableCellsSet = concatSetAndArray(availableCellsSet, enPassantAvailableCell(game, currX, currY));
             break;
         case PieceType.Knight:
             for (let col = -2; col <= 2; col++) {
@@ -226,18 +230,20 @@ const availableCells = (game, currX, currY, testInCheck = true) => {
             }
             break;
         case PieceType.Rook:
-            availableCellsSet = new Set([...straightAvailableCells(board, currX, currY)]);
+            availableCellsSet = arrayToSet(straightAvailableCells(board, currX, currY));
             break;
         case PieceType.Queen:
-            availableCellsSet = new Set([...straightAvailableCells(board, currX, currY), ...diagAvailableCells(board, currX, currY)]);
+            availableCellsSet = concatArraysToSet(straightAvailableCells(board, currX, currY), diagAvailableCells(board, currX, currY));
             break;
         case PieceType.Bishop:
-            availableCellsSet = new Set([...diagAvailableCells(board, currX, currY)]);
+            availableCellsSet = arrayToSet(diagAvailableCells(board, currX, currY));
             break;
-        case PieceType.King: //Todo castle
+        case PieceType.King:
             for (let row = currY - 1; row <= currY + 1; row++) {
                 for (let col = currX - 1; col <= currX + 1; col++) {
-                    if (inBoundaries(row, col) && !board.at(row, col).inCheckBy.has(otherColor(currPiece.color)) && ((_b = board.at(row, col).piece) === null || _b === void 0 ? void 0 : _b.color) !== currPiece.color)
+                    if (inBoundaries(row, col)
+                        && !board.at(row, col).inCheckBy.has(otherColor(currPiece.color))
+                        && ((_b = board.at(row, col).piece) === null || _b === void 0 ? void 0 : _b.color) !== currPiece.color)
                         availableCellsSet.add({ x: col, y: row });
                 }
             }
@@ -253,7 +259,7 @@ const availableCells = (game, currX, currY, testInCheck = true) => {
     }
     if (testInCheck) { //to fix : with MoveType.
         const color = currPiece.color;
-        const king = color === Color.White ? game.whiteKing : game.blackKing;
+        const king = (color === Color.White) ? game.whiteKing : game.blackKing;
         for (const cell of availableCellsSet) {
             // boardMovePiece(board, currX, currY, cell.x, cell.y, false)
             if (isInCheck(game, otherColor(color), king.y, king.x)) {
@@ -263,8 +269,8 @@ const availableCells = (game, currX, currY, testInCheck = true) => {
         }
     }
     return availableCellsSet;
-};
-const removePiece = (board, x, y) => {
+}
+function removePiece(board, x, y) {
     const oldCell = board.at(y, x);
     if (oldCell.piece === undefined)
         return;
@@ -272,8 +278,8 @@ const removePiece = (board, x, y) => {
     oldCell.piece.y = undefined;
     oldCell.piece.isOut = true;
     oldCell.piece = undefined;
-};
-const boardMovePiece = (board, oldX, oldY, targetX, targetY, sideEffects = true) => {
+}
+function boardMovePiece(board, oldX, oldY, targetX, targetY, sideEffects = true) {
     //Only manages changing the position of a piece on the board, regardless of other aspects, for that, see movePiece.
     if (!inBoundaries(targetX, targetY) || !inBoundaries(oldX, oldY))
         return;
@@ -284,70 +290,72 @@ const boardMovePiece = (board, oldX, oldY, targetX, targetY, sideEffects = true)
     //endif
     board.at(targetY, targetX).piece = board.at(oldY, oldX).piece; //new cell
     board.at(oldY, oldX).piece = undefined; //old cell
-};
-const promotion = (piece, newPieceType) => {
+}
+function promotion(piece, newPieceType) {
     piece.type = newPieceType;
     piece.image = getImage(piece.color, newPieceType);
-};
-const movePiece = (game, oldX, oldY, newX, newY) => __awaiter(void 0, void 0, void 0, function* () {
-    clearMessage();
-    const piece = game.board.at(oldY, oldX).piece;
-    if (piece === undefined)
-        return; //empty cell
-    //Check if right player's turn
-    if (piece.color !== game.turn) {
-        message("It's not your turn!");
-        return;
-    }
-    //Check if newCoords is in available cells
-    if (![...availableCells(game, oldX, oldY)].some((coords_elt) => { return coords_elt.x === newX && coords_elt.y === newY; })) {
-        message("This square is unavailable!");
-        return;
-    }
-    //Test if pawn moved 2 cells
-    piece.enPassantable = (piece.type === PieceType.Pawn && !piece.hasMoved && Math.abs(newY - oldY) === 2); //if it's pawn's first move two cells forwards.
-    let move;
-    //If castle
-    if (piece.type === PieceType.King && !piece.hasMoved && Math.abs(oldX - newX) == 2) {
-        const direction = oldX > newX ? 1 : -1; //1 : moves to the left, -1 : moves to the right
-        const rookPosX = direction > 0 ? 0 : 7;
-        const rookMovesToX = newX + direction;
-        move = new Move(game, oldX, oldY, newX, newY, undefined, undefined, rookPosX);
-        // game.moves.push(new Move(game, targetX, oldY, rookMovesToX, newY, undefined, undefined, undefined)) //add castle move
-        boardMovePiece(game.board, rookPosX, newY, rookMovesToX, newY);
-    }
-    else if ( //en passant
-    piece.type === PieceType.Pawn
-        && oldX != newX //not same file
-        && game.board.at(newY, newX).piece === undefined //diagonal but no piece on the target cell
-    ) {
-        move = new Move(game, oldX, oldY, newX, newY, newX, oldY);
-        removePiece(game.board, newX, oldY); //remove en passant-ed pawn
-    }
-    else {
-        move = new Move(game, oldX, oldY, newX, newY);
-        if (game.board.at(newY, newX).piece !== undefined) //if taking a piece
-            removePiece(game.board, newX, newY);
-    }
-    boardMovePiece(game.board, oldX, oldY, newX, newY);
-    game.moves.push(move);
-    //Test if promotion
-    if (piece.type === PieceType.Pawn && [0, 7].includes(newY)) {
-        const prom = new Promotion(piece.color, newX, newY, newY == 0 ? 1 : -1);
-        toDraw.add(prom);
-        // promotion(piece, PieceType.Queen); //auto-promote to queen : temporary.
-        promotion(piece, yield choosePromotion(prom));
-        toDraw.delete(prom);
-    }
-    //Captures
-    if (move.pieceTaken !== undefined) {
-        if (game.turn === Color.White) {
-            game.whiteCaptures.push(move.pieceTaken);
+}
+function movePiece(game, oldX, oldY, newX, newY) {
+    return __awaiter(this, void 0, void 0, function* () {
+        clearMessage();
+        const piece = game.board.at(oldY, oldX).piece;
+        if (piece === undefined)
+            return; //empty cell
+        //Check if right player's turn
+        if (piece.color !== game.turn) {
+            message("It's not your turn!");
+            return;
         }
-        else if (game.turn === Color.Black) {
-            game.blackCaptures.push(move.pieceTaken);
+        //Check if newCoords is in available cells
+        if (![...availableCells(game, oldX, oldY)].some((coords_elt) => { return coords_elt.x === newX && coords_elt.y === newY; })) {
+            message("This square is unavailable!");
+            return;
         }
-    }
-    game.nextTurn();
-    // return move.pieceTaken
-});
+        //Test if pawn moved 2 cells
+        piece.enPassantable = (piece.type === PieceType.Pawn && !piece.hasMoved && Math.abs(newY - oldY) === 2); //if it's pawn's first move two cells forwards.
+        let move;
+        //If castle
+        if (piece.type === PieceType.King && !piece.hasMoved && Math.abs(oldX - newX) == 2) {
+            const direction = oldX > newX ? 1 : -1; //1 : moves to the left, -1 : moves to the right
+            const rookPosX = direction > 0 ? 0 : 7;
+            const rookMovesToX = newX + direction;
+            move = new Move(game, oldX, oldY, newX, newY, undefined, undefined, rookPosX);
+            // game.moves.push(new Move(game, targetX, oldY, rookMovesToX, newY, undefined, undefined, undefined)) //add castle move
+            boardMovePiece(game.board, rookPosX, newY, rookMovesToX, newY);
+        }
+        else if ( //en passant
+        piece.type === PieceType.Pawn
+            && oldX != newX //not same file
+            && game.board.at(newY, newX).piece === undefined //diagonal but no piece on the target cell
+        ) {
+            move = new Move(game, oldX, oldY, newX, newY, newX, oldY);
+            removePiece(game.board, newX, oldY); //remove en passant-ed pawn
+        }
+        else {
+            move = new Move(game, oldX, oldY, newX, newY);
+            if (game.board.at(newY, newX).piece !== undefined) //if taking a piece
+                removePiece(game.board, newX, newY);
+        }
+        boardMovePiece(game.board, oldX, oldY, newX, newY);
+        game.moves.push(move);
+        //Test if promotion
+        if (piece.type === PieceType.Pawn && [0, 7].includes(newY)) {
+            const prom = new Promotion(piece.color, newX, newY, (newY == 0) ? 1 : -1);
+            toDraw.add(prom);
+            // promotion(piece, PieceType.Queen); //auto-promote to queen : temporary.
+            promotion(piece, yield choosePromotion(prom));
+            toDraw.delete(prom);
+        }
+        //Captures
+        if (move.pieceTaken !== undefined) {
+            if (game.turn === Color.White) {
+                game.whiteCaptures.push(move.pieceTaken);
+            }
+            else if (game.turn === Color.Black) {
+                game.blackCaptures.push(move.pieceTaken);
+            }
+        }
+        game.nextTurn();
+        // return move.pieceTaken
+    });
+}

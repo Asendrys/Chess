@@ -4,7 +4,8 @@ var Color;
     Color[Color["Black"] = 0] = "Black";
     Color[Color["White"] = 1] = "White";
 })(Color || (Color = {}));
-const otherColor = (color) => {
+;
+function otherColor(color) {
     switch (color) {
         case Color.Black:
             return Color.White;
@@ -13,7 +14,7 @@ const otherColor = (color) => {
         default:
             throw new Error("unreachable");
     }
-};
+}
 var PieceType;
 (function (PieceType) {
     PieceType[PieceType["King"] = 0] = "King";
@@ -23,6 +24,7 @@ var PieceType;
     PieceType[PieceType["Knight"] = 4] = "Knight";
     PieceType[PieceType["Pawn"] = 5] = "Pawn";
 })(PieceType || (PieceType = {}));
+;
 class Piece {
     constructor(color, pieceType, x, y, hasID = true) {
         this.color = color;
@@ -43,3 +45,4 @@ class Piece {
     }
 }
 Piece.numPieces = 0;
+;

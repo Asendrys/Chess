@@ -1,17 +1,17 @@
-let playerview : Color = Color.White //temp
+let playerview : Color = Color.White; //temp
 
 function switchView() : void {
-    playerview = otherColor(playerview)
-    update()
+    playerview = otherColor(playerview);
+    update();
 }
 
-const game : Game = new Game()
+const game : Game = new Game();
 
 function init() : void {
-    update()
+    update();
 }
 
 function update() : void {
-    updateView()
-    updateCaptures()
+    updateView();
+    updateCaptures();
 }

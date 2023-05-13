@@ -1,7 +1,7 @@
 "use strict";
 class Game {
     constructor() {
-        var _a, _b;
+        var _a, _b, _c;
         this.board = new Board();
         this.turn = Color.White;
         this.moves = [];
@@ -11,17 +11,16 @@ class Game {
         this.blackPieces = [];
         this.whiteKing = (_a = this.board.at(7, 4)) === null || _a === void 0 ? void 0 : _a.piece;
         this.blackKing = (_b = this.board.at(0, 4)) === null || _b === void 0 ? void 0 : _b.piece;
-        [6, 7].forEach((row) => {
-            var _a;
+        for (const row of [6, 7]) {
             for (let col = 0; col < 8; col++) {
-                this.whitePieces.push((_a = this.board.at(row, col)) === null || _a === void 0 ? void 0 : _a.piece);
+                this.whitePieces.push((_c = this.board.at(row, col)) === null || _c === void 0 ? void 0 : _c.piece);
             }
-        });
-        [0, 1].forEach((row) => {
+        }
+        for (const row of [0, 1]) {
             for (let col = 0; col < 8; col++) {
                 this.blackPieces.push(this.board.at(row, col).piece);
             }
-        });
+        }
         this.whiteCaptures = [];
         this.blackCaptures = [];
     }
@@ -38,12 +37,7 @@ class Game {
     }
     nextTurn() {
         // console.log((this.moves.slice(-1)[0]).toString())
-        if (this.turn === Color.White) {
-            this.turn = Color.Black;
-        }
-        else if (this.turn === Color.Black) {
-            this.turn = Color.White;
-        }
+        this.turn = otherColor(this.turn);
     }
     getLastMove() {
         if (this.moves.length === 0)
